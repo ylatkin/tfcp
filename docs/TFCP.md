@@ -58,6 +58,6 @@ Both these articles are available at my Web page dedicated to the twofolds:
 
 Even reference implementation is quite fast: your code with `tfcp::coupled<double>` numbers would run much faster than with `__float128` arithmetic.
 
-You can additionally boost your code with OpenCL-like short vectors. My reference code would support vectored types like `std::coupled<double4>` etc.
+You can additionally boost your code with OCL-like short vectors (e.g. `float4`, `double4`). Reference would support vectored types like `std::coupled<double4>`, etc.
 
 You can also leverage from `std::valarray<coupled>`, it is vectored if processor supports SIMD.
