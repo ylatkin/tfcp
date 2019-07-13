@@ -60,4 +60,4 @@ Even reference implementation is quite fast: your code with `tfcp::coupled<doubl
 
 You can additionally boost your code with OpenCL-like short vectors. My reference code would support vectored types like `std::coupled<double4>` etc.
 
-You can also leverage from `std::valarray` of coupled: it is vectored if processor supports SIMD.
+You can also leverage from `std::valarray<coupled>`, it is vectored if processor supports SIMD.
