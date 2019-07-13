@@ -14,23 +14,31 @@ As the compromise, math software could use twofold numbers in DEBUG mode, and sw
 
 If standard FP64 precision is found not enough for some numeric code, the TFCP project supplies "coupled" numbers with 2x wider mantissa.
 
+## License
+
+I would like to convince people to use twofolds, so license would be very permissive:
+
+* My reference implementation would be _free_ for any purpose including commercial.
+
+I hope to convince the hardware vendors supporting twofolds, if many people would adopt.
+
 ## Stages
 
 (1) Reference library  
-(2) Performance demo  
-(3) Compilers support  
-(4) Hardware support  
+(2) Compilers support  
+(3) Hardware support  
 
-Reference library would provide twofold numbers for C++.
-Enable standard number use cases: I/O, copying, comparing, arithmetic operations, elementary functions, complex numbers, and value-arrays.
-Implementation would be hardware-agnostic with moderate optimization.
+Reference library would provide twofold and coupled numbers for C++.
+Enable standard use cases: I/O, copying, comparing, arithmetic operations, elementary functions, complex numbers, and value-arrays.
+Using it would be as easy as replacing `double` type with `twofold`.
 
-Performance demo would exhibit optimization for AMD/Intel processors.
-It would additionally provide twofold short-vectors for SSE/AVX, and optimized implementation of `std::valarray` (for 1 thread).
-The demo would perform at 70-90% of CPU theoretical peak.
+My reference implementation would demonstrate well enough performance.
+It would provide OCL-like short vectors (e.g. `float4`) as the HAL for SIMD operations on AMD/Intel processors.
+My code would vectorize `std::valaray` over `twofold` numbers (only for 1-thread).
 
-If many people adopt the twofold arithmetic (adoption target TBD), then I hope to encourage providers of C/C++ compilers to support twofold numbers.
-Compilers should support automatic vectoring of numeric algorithms similarly to regular floating-point data.
+If many people adopt the twofold arithmetic (adoption target TBD), then I hope to convince developers of C/C++ compilers to support twofold numbers.
+I hope compilers would support automatic vectoring of twofold operations similarly to regular floating-point types.
 
-Ultimately, I hope to encourage hardware vendors (like Intel and AMD) to support the instructions for taking the round-offs from the basic operations: +, -, *, /, sqrt, fma.
-Ideally, this would allow twofold operations to performa at 1/2 of regular douple-precision arithmetic.
+Ultimately, I hope to convince vendors like Intel and AMD to support twofold arithmetic in hardware.
+Instructions for taking the round-offs from the basic operations (+, -, *, /, sqrt, fma) must be enough.
+Ideally, `twofold` could perform only 2-3x times slower than regular `double`.
