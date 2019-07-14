@@ -9,6 +9,7 @@ Contents
 * [Strategy](#Strategy)
 * [Stages](#Stages)
 * [Technique](#Technique)
+* [Safe bool](#Safe-bool)
 
 ---
 
@@ -98,6 +99,34 @@ Both these articles are available at my Web page dedicated to the twofolds:
 
 Even reference implementation is quite fast: your code with `tfcp::coupled<double>` numbers would run much faster than with `__float128` arithmetic.
 
-You can additionally boost your code with OCL-like short vectors (e.g. `float4`, `double4`). Reference would support vectored types like `std::coupled<double4>`, etc.
+You can additionally boost your code with OCL-like short vectors (e.g. `float4`, `double2`). My code would support vectored types like `std::coupled<double2>`, etc.
 
-You can also leverage from `std::valarray<coupled>`, it is vectored if processor supports SIMD.
+Finally, you can test performance of `std::valarray<coupled>`, which is vectored if processor supports SIMD.
+
+## Safe bool
+
+Comparing of twofold numbers may result in something undefined, not `true` neither `false`. E.g.:
+```c++
+using tfloat = twofold<float>;
+tfloat e = 2.718281828459045…; // 7+7 decimal digits
+float  m = (float) e;          // main part, 7 digits
+tfloat d = e - m;              // equals 0, but error
+if (d == 0) {                  // undefined behavior!
+    .   .   .
+}
+```
+
+Here, we cannot decide if twofold `d` is zero: because `d` equals _value_ + _error_, where the _value_ part is zero but the _error_ part is not zero.
+
+Comparison of twofolds would result in especial `tfcp::safe_bool` type, which allows the _undefined_ value in addition to `true` and `false`.
+
+Safe-bool `undefined` is sort of similar to floating-point NaN.
+Computations may continue instead of throwing from the `d == 0` test.
+
+Techncally, you can check if the result is `undefined` and process, like this e.g.:
+```c++
+safe_bool b = (d == 0);
+assert(!is_undefined(b));
+```
+
+The `if` statement examines the `safe_bool` by converting it into standard `bool`, and such conversion throws if the safe-bool value is undefined.
