@@ -83,10 +83,12 @@ Ideally, `twofold` could be only 3-4x times slower than regular `double`.
 Twofold approximates like _value_ + _error_, where _value_ is same as original floating-point value, and _error_ estimates its rounding error.
 For example:
 
-    e = 2.718281828459045…				-- an exact real value  
-    value = 2.718282 = round(e)			-- with 7 decimal digits  
-    error = -0.0000001715410 = round(e - value)	-- with 7 digits  
-    value + error = 2.7182818284590			-- with 14 digits  
+Number                                            | Comment
+--------------------------------------------------|--------------------  
+_e_ = 2.718281828459045…                          | an exact real value  
+_value_ = 2.718282 = round(_e_)                   | with 7 decimal digits  
+_error_ = -0.0000001715410 = round(_e_ - _value_) | with 7 digits  
+_value_ + _error_ = 2.7182818284590               | with 14 digits  
 
 Fast formulas for implementing arithmetic operations over twofold numbers and C++ interface is described in my article:  
 
@@ -109,24 +111,22 @@ Comparing of twofold numbers may result in something undefined, not `true` neith
 ```c++
 using tfloat = twofold<float>;
 tfloat e = 2.718281828459045…; // 7+7 decimal digits
-float  m = (float) e;          // main part, 7 digits
+float  m = (float) e;          // main part: 7 digits
 tfloat d = e - m;              // equals 0, but error
-if (d == 0) {                  // undefined behavior!
+if (d == 0) {                  // undefined!
     .   .   .
 }
 ```
 
 Here, we cannot decide if twofold `d` is zero: because `d` equals _value_ + _error_, where the _value_ part is zero but the _error_ part is not zero.
 
-Comparison of twofolds would result in especial `tfcp::safe_bool` type, which allows the _undefined_ value in addition to `true` and `false`.
+Comparison of twofolds would result in especial `tfcp::safe_bool` type, which allows the `undefined` value in addition to `true` and `false`.
 
 Safe-bool `undefined` is sort of similar to floating-point NaN.
-Computations may continue instead of throwing from the `d == 0` test.
-
-Techncally, you can check if the result is `undefined` and process, like this e.g.:
+Techncally, you can check and process if the result is `undefined`, like this e.g.:
 ```c++
 safe_bool b = (d == 0);
 assert(!is_undefined(b));
 ```
 
-The `if` statement examines the `safe_bool` by converting it into standard `bool`, and such conversion throws if the safe-bool value is undefined.
+The **_if_** statement examines the `safe_bool` by converting it into standard `bool`, and such conversion throws if the safe-bool value is undefined.
