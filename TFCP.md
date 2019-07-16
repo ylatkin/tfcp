@@ -2,7 +2,7 @@
 
 Evgeny Latkin <<yevgeny.latkin@gmail.com>>  
 2018 Dec 4  
-2019 Jul 13-14  
+2019 Jul 13-14, 16  
 
 Contents
 * [Intro](#Intro)
@@ -10,8 +10,6 @@ Contents
 * [Stages](#Stages)
 * [Technique](#Technique)
 * [Safe bool](#Safe-bool)
-
----
 
 ## Intro
 
@@ -40,8 +38,6 @@ Consider `tfcp::twofold` as the _optimistic_ sort of intervals, which never over
 
 Consider `tfcp::coupled` as the _surrogate_ of 128-bit floats, less accurate than the true `__float128` but much faster on modern processors.
 
----
-
 ## Strategy
 
 License is very permissive: interface and reference implementation are _free_ for any purpose including commercial. 
@@ -53,30 +49,27 @@ Then, if you find the standard FP64 precision is not enough for some calculation
 
 In future, if processors support fast FP128 arithmetic in hardware, I think you would value simulating octal precision with `tfcp::coupled<quad>` where necessary.
 
----
-
 ## Stages
 
 (1) Reference library  
-(2) Compilers support  
-(3) Hardware support  
+(2) Performance demo  
+(3) Compilers support  
+(4) Hardware support  
 
 Reference library would provide twofold and coupled numbers for C++.
 Enable standard use cases: I/O, copying, comparing, arithmetic operations, elementary functions, complex numbers, and value-arrays.
 Using it would be as easy as replacing `double` type with `twofold`.
 
-My reference implementation would demonstrate well enough performance.
-It would provide OCL-like short vectors (e.g. `float4`) as the HAL for SIMD operations on AMD/Intel processors.
-My code would vectorize `std::valaray` over `twofold` and `coupled` numbers.
+My implementation would support twofolds over short-vector types like `double4` on SIMD processors, and vectorize `std::valarray` over twofold numbers. This would fuel
+several performance demo/tests, show that twofolds can perform only 2x slower than regular `double` sometimes.
 
-Assuming many people adopt the twofold arithmetic (adoption target TBD), I hope to convince developers of C/C++ compilers to support twofold numbers.
-I hope compilers would support automatic vectoring of twofold operations similarly to regular floating-point types.
+Assuming many enough people adopt the twofold numbers, then 
+I hope C/C++ compilers would support automatic vectoring of twofold operations.
+Not sure if I can implement this myself, I would rather convince developers of C/C++ compilers to support twofold numbers.
 
 Then I hope to convince hardware vendors like Intel and AMD to support twofold arithmetic in future processors.
 New instructions for taking the round-off of the basic operations (+, -, *, /, sqrt, fma) must be enough.
-Ideally, `twofold` could be only 3-4x times slower than regular `double`.
-
----
+Ideally, twofolds could be only 2x times slower than regular `double`.
 
 ## Technique
 
@@ -104,8 +97,6 @@ Even reference implementation is quite fast: your code with `tfcp::coupled<doubl
 You can additionally boost your code with OCL-like short vectors (e.g. `float4`, `double2`). My code would support vectored types like `std::coupled<double2>`, etc.
 
 Finally, you can test performance of `std::valarray<coupled>`, which is vectored if processor supports SIMD.
-
----
 
 ## Safe bool
 
