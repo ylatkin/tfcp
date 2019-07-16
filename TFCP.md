@@ -8,6 +8,7 @@ Contents
 * [Intro](#Intro)
 * [Strategy](#Strategy)
 * [Stages](#Stages)
+* [Performance](#Performance)
 * [Technique](#Technique)
 * [Safe bool](#Safe-bool)
 
@@ -71,6 +72,14 @@ Then I hope to convince hardware vendors like Intel and AMD to support twofold a
 New instructions for taking the round-off of the basic operations (+, -, *, /, sqrt, fma) must be enough.
 Ideally, twofolds could be only 2x times slower than regular `double`.
 
+## Performance
+
+My reference library would be quite fast: your code with `tfcp::coupled<double>` would run up to 10x times faster than with `__float128` numbers.
+
+On a SIMD processor, you can manually boost your code by 2-4x times with short vectors, like `tfcp::coupled4`, similarly to vectoring with `double4`.
+
+Although, you may find it more convenient leveraging performance boost from the vectored `std::valarray<coupled>` operations.
+
 ## Technique
 
 Twofold approximates like _value_ + _error_, where _value_ is same as original floating-point value, and _error_ estimates its rounding error.
@@ -91,12 +100,6 @@ Fast formulas for implementing arithmetic operations over twofold numbers and C+
 Both these articles are available at my Web page dedicated to the twofolds:
 
 * https://sites.google.com/site/yevgenylatkin/twofold-arithmetic
-
-Even reference implementation is quite fast: your code with `tfcp::coupled<double>` numbers would run much faster than with `__float128` arithmetic.
-
-You can additionally boost your code with OCL-like short vectors (e.g. `float4`, `double2`). My code would support vectored types like `std::coupled<double2>`, etc.
-
-Finally, you can test performance of `std::valarray<coupled>`, which is vectored if processor supports SIMD.
 
 ## Safe bool
 
