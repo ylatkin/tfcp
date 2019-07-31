@@ -2,7 +2,7 @@
 
 Evgeny Latkin <<yevgeny.latkin@gmail.com>>  
 2018 Dec 4  
-2019 Jul 13-14, 16, 30  
+2019 Jul 13-14, 16, 30-31  
 
 Contents
 * [Intro](#Intro)
@@ -10,6 +10,7 @@ Contents
 * [Stages](#Stages)
 * [Technique](#Technique)
 * [Safe bool](#Safe-bool)
+* [Safe int](#Safe-int)
 
 ## Intro
 
@@ -23,7 +24,7 @@ Twofold numbers would help automatically debugging of floating-point errors like
 twofold<double> result;
 // …compute result with same formulas,
 // as if it were ordinary double type…
-assert(|error_of(result)| ≤ threshold);
+assert(|error_of(result)| <= threshold);
 ```
 
 Twofold numbers operate with both standard and extended precisions and track deviations caused by round-offs.
@@ -38,7 +39,7 @@ coupled<double> result;
 cout << result;
 ```
 
-Consider `tfcp::twofold` as _optimistic_ sort of intervals, which never over-estimates error, so can apply to legacy algorithms.
+Consider `tfcp::twofold` as _optimistic_ sort of intervals, which never over-estimates error so can apply to legacy algorithms.
 
 Consider `tfcp::coupled` as _surrogate_ of true 128-bit floats, less accurate than IEEE-754's `__float128` but much faster.
 
@@ -92,7 +93,7 @@ _value_ = 2.718282 = round(_e_)                   | with 7 decimal digits
 _error_ = -0.0000001715410 = round(_e_ - _value_) | with 7 digits  
 _value_ + _error_ = 2.7182818284590               | with 14 digits  
 
-Fast formulas for implementing arithmetic operations over twofold numbers and C++ interface is described in my article:  
+Fast formulas for implementing arithmetic operations over twofold numbers and C++ interface is described in my articles:  
 
 * [Twofold fast arithmetic](https://sites.google.com/site/yevgenylatkin/twofold-arithmetic/twofold-fast-arithmetic)
 * [Twofolds in C and C++](https://sites.google.com/site/yevgenylatkin/twofold-arithmetic/twofolds-in-c-and-c)
@@ -100,6 +101,9 @@ Fast formulas for implementing arithmetic operations over twofold numbers and C+
 Both these articles are available at my Web page dedicated to the twofolds:
 
 * https://sites.google.com/site/yevgenylatkin/twofold-arithmetic
+
+You may also download previous (experimental) version of my code from this site.
+But please note that it is _not_ for commercial use.
 
 ## Safe bool
 
@@ -116,13 +120,34 @@ if (d == 0) {                  // undefined!
 
 Here, we cannot decide if twofold `d` is zero: because `d` equals _value_ + _error_, where the _value_ part is zero but the _error_ part is not zero.
 
-Comparison of twofolds would result in especial `tfcp::safe_bool` type, which allows the `undefined` value in addition to `true` and `false`.
+Such _if_ statement will throw TFCP exception to let you know about this accuracy problem in your code, so you can debug and fix it.
 
-Safe-bool `undefined` is sort of similar to floating-point NaN.
-Techncally, you can check and process if the result is `undefined`, like this e.g.:
+Smoother way to debug this situation would be checking if result of testing `d` against exact zero is undefined.
+
+Comparison of twofolds would return in the especial `tfcp::safe_bool` type, which allows the `undefined` value in addition to `true` and `false`.
+
+Safe-bool `undefined` is similar to floating-point NaN, like not-a-bool value.
+You can check if result is `undefined` to process such case, e.g.:
 ```c++
 safe_bool b = (d == 0);
 assert(!is_undefined(b));
 ```
 
-The **_if_** statement examines the `safe_bool` by converting it into standard `bool`, and such conversion throws if the safe-bool value is undefined.
+An _if_ statement would convert `safe_bool` into standard `bool`, which conversion may throw TFCP exception if result is undefined.
+
+## Safe int
+
+If `d` is the same nearly-zero value as in the [Safe bool](#Safe-bool) section above, converting `d` to integer like `(int)d` would throw TFCP exception.
+
+Alternatively, you may debug such converion in the smoother way by first converting into especial `tfcp::safe_int` type, e.g.:
+```c++
+safe_int i = d;
+assert(!is_undefined(i));
+```
+
+Especial `tfcp::safe_int` type interprets `INT_MIN` (usually equals -2<sup>31</sup> + 1) as integer NaN, and throws if converting NaN to `int`.
+
+Converting `twofold` to `safe_int` returns NaN if twofold's _error_ part is too much to uniquely identify the integer result.
+
+Note, that there is no safe type for unsigned integer.
+Converting a twofold into unsigned throws immediately.
