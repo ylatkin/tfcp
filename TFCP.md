@@ -150,4 +150,4 @@ Especial `tfcp::safe_int` type interprets `INT_MIN` (usually equals -2<sup>31</s
 Converting `twofold` to `safe_int` returns NaN if twofold's _error_ part is too much to uniquely identify the integer result.
 
 Note, that there is no safe type for unsigned integer.
-Converting a twofold into unsigned throws immediately.
+Converting a twofold into unsigned throws immediately if error.
