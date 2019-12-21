@@ -1,0 +1,19 @@
+# https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# 4 space indentation
+[*.{c,cc,cpp,h,hpp}]
+indent_style = space
+indent_size = 4
+
+# Tab indentation
+[Makefile]
+indent_style = tab
