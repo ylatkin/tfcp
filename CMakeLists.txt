@@ -21,4 +21,11 @@ else()
     message(FATAL "Unsupported OS: not Linux or Windows")
 endif()
 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 add_subdirectory(tests)
+
+enable_testing()
+add_test(NAME test_unit COMMAND test_unit)
