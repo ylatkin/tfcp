@@ -1,3 +1,8 @@
+//======================================================================
+// 2019 (c) Evgeny Latkin
+// License: Apache 2.0 (http://www.apache.org/licenses/)
+//======================================================================
+
 #include <tfcp/simd.h>
 
 #include <gtest/gtest.h>

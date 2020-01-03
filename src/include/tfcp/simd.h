@@ -1,6 +1,6 @@
 //======================================================================
 // 2019 (c) Evgeny Latkin
-// Licence: Apache 2.0 (http://www.apache.org/licenses/)
+// License: Apache 2.0 (http://www.apache.org/licenses/)
 //======================================================================
 
 #ifndef TFCP_SIMD_H
