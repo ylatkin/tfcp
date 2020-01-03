@@ -1,8 +1,5 @@
-set(target test_unit)
-
 file(GLOB sources *.cpp)
-
-add_executable(${target} ${sources})
-target_compile_options(${target} PRIVATE ${CXX_OPTS_FMA})
-target_link_libraries(${target} GTest::GTest GTest::Main)
-target_include_directories(${target} PRIVATE ${TFCP_SRC_INCLUDE_DIR})
+add_executable(test_unit ${sources})
+target_link_libraries(test_unit gtest gtest_main)
+target_compile_options(test_unit PRIVATE ${CXX_OPTS_FMA})
+target_include_directories(test_unit PRIVATE ${TFCP_SRC_INCLUDE_DIR} ${GTEST_SOURCE_DIR}/include)
