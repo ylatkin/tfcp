@@ -184,7 +184,8 @@ namespace tfcp {
     }
 
     inline double sqrt(double x) {
-        return _mm_cvtsd_f64(_mm_sqrt_sd(_mm_set_sd(x), _mm_setzero_pd()));
+        __m128d tmp = _mm_set_sd(x);
+        return _mm_cvtsd_f64(_mm_sqrt_sd(tmp, tmp));
     }
 
 #else

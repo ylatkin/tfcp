@@ -17,4 +17,5 @@ target_link_libraries(test_unit gtest gtest_main)
 target_compile_options(test_unit PRIVATE ${CXX_OPTS_FMA})
 
 target_include_directories(test_unit PRIVATE ${TFCP_SOURCE_DIR}/src/include
+                                             ${TFCP_SOURCE_DIR}/tests/include
                                              ${GTEST_SOURCE_DIR}/include)

@@ -11,14 +11,6 @@
 #include <iostream>
 #include <string>
 
-#if !defined(TFCP_SIMD_AVX)
-#error TFCP_SIMD_AVX undefined! (please enable AVX2)
-#endif
-
-#if !defined(TFCP_SIMD_FMA)
-#error TFCP_SIMD_FMA undefined! (please enable AVX2)
-#endif
-
 namespace {
 
 using namespace tfcp;
@@ -27,31 +19,31 @@ using namespace testing;
 
 //----------------------------------------------------------------------
 
-class TestUnitFma : public TestWithParam<TypeName> {
+class TestUnitSqrt : public TestWithParam<TypeName> {
 protected:
     template<typename T>
-    static void test_fma(const std::string& typeName) {
-        T x = { 1 }, y = { 2 }, z = { 3 };
-        T result = tfcp::fmsub(x, y, z);
-        EXPECT_EQ(get(result, 0), -1);
+    static void test_sqrt(const std::string& typeName) {
+        T x = { 4 }, result;
+        result = tfcp::sqrt(x);
+        EXPECT_EQ(get(result, 0), 2);
     }
 };
 
-TEST_P(TestUnitFma, smoke) {
+TEST_P(TestUnitSqrt, smoke) {
     auto param = GetParam();
     std::string typeName = param.get();
 
     if (typeName == "float") {
-        test_fma<float>(typeName);
+        test_sqrt<float>(typeName);
     }
     else if (typeName == "double") {
-        test_fma<double>(typeName);
+        test_sqrt<double>(typeName);
     }
     else if (typeName == "floatx") {
-        test_fma<floatx>(typeName);
+        test_sqrt<floatx>(typeName);
     }
     else if (typeName == "doublex") {
-        test_fma<doublex>(typeName);
+        test_sqrt<doublex>(typeName);
     }
     else {
         FAIL();
@@ -62,7 +54,7 @@ TEST_P(TestUnitFma, smoke) {
 
 } // namespace
 
-INSTANTIATE_TEST_SUITE_P(types, TestUnitFma,
+INSTANTIATE_TEST_SUITE_P(types, TestUnitSqrt,
                          Values(TypeName("float"),
                                 TypeName("double"),
                                 TypeName("floatx"),
