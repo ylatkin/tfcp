@@ -8,7 +8,6 @@
 
 #include <gtest/gtest.h>
 
-#include <iostream>
 #include <string>
 
 namespace {
@@ -18,6 +17,8 @@ using namespace tfcp;
 using namespace testing;
 
 //----------------------------------------------------------------------
+
+using TypeName = std::string;
 
 class TestUnitSqrt : public TestWithParam<TypeName> {
 protected:
@@ -30,8 +31,7 @@ protected:
 };
 
 TEST_P(TestUnitSqrt, smoke) {
-    auto param = GetParam();
-    std::string typeName = param.get();
+    auto typeName = GetParam();
 
     if (typeName == "float") {
         test_sqrt<float>(typeName);
@@ -54,9 +54,7 @@ TEST_P(TestUnitSqrt, smoke) {
 
 } // namespace
 
-INSTANTIATE_TEST_SUITE_P(types, TestUnitSqrt,
-                         Values(TypeName("float"),
-                                TypeName("double"),
-                                TypeName("floatx"),
-                                TypeName("doublex")),
-                         PrintToStringParamName());
+INSTANTIATE_TEST_SUITE_P(types, TestUnitSqrt, Values("float",
+                                                     "double",
+                                                     "floatx",
+                                                     "doublex"));

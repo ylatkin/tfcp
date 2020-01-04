@@ -8,7 +8,6 @@
 
 #include <gtest/gtest.h>
 
-#include <iostream>
 #include <string>
 
 #if !defined(TFCP_SIMD_AVX)
@@ -27,6 +26,8 @@ using namespace testing;
 
 //----------------------------------------------------------------------
 
+using TypeName = std::string;
+
 class TestUnitFma : public TestWithParam<TypeName> {
 protected:
     template<typename T>
@@ -38,8 +39,7 @@ protected:
 };
 
 TEST_P(TestUnitFma, smoke) {
-    auto param = GetParam();
-    std::string typeName = param.get();
+    auto typeName = GetParam();
 
     if (typeName == "float") {
         test_fma<float>(typeName);
@@ -62,9 +62,7 @@ TEST_P(TestUnitFma, smoke) {
 
 } // namespace
 
-INSTANTIATE_TEST_SUITE_P(types, TestUnitFma,
-                         Values(TypeName("float"),
-                                TypeName("double"),
-                                TypeName("floatx"),
-                                TypeName("doublex")),
-                         PrintToStringParamName());
+INSTANTIATE_TEST_SUITE_P(types, TestUnitFma, Values("float",
+                                                    "double",
+                                                    "floatx",
+                                                    "doublex"));
