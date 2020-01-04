@@ -26,19 +26,18 @@ execute() {
 	$*
 }
 
-echo "#"
-echo "# Create build folder"
-echo "#"
 mkdir -p build/linux
 execute cd build/linux || exit $?
 
 #=======================================================================
 
 testme() {
+    echo "#======================================================================="
     echo "#"
     echo "# Compiler: $1"
     echo "# Config: $2"
     echo "#"
+    echo "#======================================================================="
 
     execute rm CMakeCache.txt
 
@@ -54,12 +53,24 @@ testme() {
 testme g++ Release
 testme g++ Debug
 
-# NB: Intel C++ provices its own clang++
-#     Test specifically /usr/bin/clang++
-testme /usr/bin/clang++ Release
-testme /usr/bin/clang++ Debug
+which_clang=`which clang++`
+if [ "$which_clang" != "" ]; then
+    testme clang++ Release
+    testme clang++ Debug
 
-testme icc Release
-testme icc Debug
+    # Intel C++ may replace original clang++
+    # Here we test original /usr/bin/clang++
+    original_clang=/usr/bin/clang++
+    if [ "$which_clang" != "$original_clang" ]; then
+        testme $original_clang Release
+        testme $original_clang Debug
+    fi
+fi
+
+which_icc=`which icc`
+if [ "$which_icc" != "" ]; then
+    testme icc Release
+    testme icc Debug
+fi
 
 #=======================================================================

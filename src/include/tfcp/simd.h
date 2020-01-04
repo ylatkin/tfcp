@@ -88,6 +88,8 @@
     #error AVX is required!
 #endif
 
+#include <cassert>
+
 //----------------------------------------------------------------------
 //
 // Define floatx/doublex for target compiler and hardware
@@ -103,10 +105,30 @@ namespace tfcp {
         typedef float  floatx  __attribute__((vector_size(32), aligned(32)));
         typedef double doublex __attribute__((vector_size(32), aligned(32)));
 
+        inline float& get(floatx& x, int i = 0) {
+            assert(0 <= i && i < 8);
+            return ((float*)& x)[i]; // clang++ compiler error if just x[i]
+        }
+
+        inline double& get(doublex& x, int i = 0) {
+            assert(0 <= i && i < 4);
+            return ((double*)& x)[i]; // clang++ compiler error if just x[i]
+        }
+
     #elif defined(TFCP_SIMD_MSC)
 
         typedef __m256  floatx;
         typedef __m256d doublex;
+
+        inline float& get(floatx& x, int i = 0) {
+            assert(0 <= i && i < 8);
+            return x.m256_f32[i];
+        }
+
+        inline double& get(doublex& x, int i = 0) {
+            assert(0 <= i && i < 4);
+            return x.m256d_f64[i];
+        }
 
         inline floatx operator + (floatx x, floatx y) { return _mm256_add_ps(x, y); }
         inline floatx operator - (floatx x, floatx y) { return _mm256_sub_ps(x, y); }
@@ -131,6 +153,16 @@ namespace tfcp {
 #else
     #error AVX is required!
 #endif
+
+    inline float& get(float& x, int i = 0) {
+        assert(i == 0);
+        return x;
+    }
+
+    inline double& get(double& x, int i = 0) {
+        assert(i == 0);
+        return x;
+    }
 
 } // namespace tfcp
 

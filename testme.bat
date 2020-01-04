@@ -22,20 +22,17 @@
 @rem Current directory
 @set TFCP_ROOT=%cd%
 
-@echo #
-@echo # Create build folder
-@echo #
 mkdir build
 mkdir build\windows
 cd build\windows
 @if not %errorlevel% == 0 goto Error
 
-@rem #==================================================================
-
+@echo #=======================================================================
 @echo #
 @echo # Compiler: cl
 @echo # Config: Release
 @echo #
+@echo #=======================================================================
 
 del CMakeCache.txt
 cmake ..\..
@@ -47,12 +44,12 @@ cmake --build . --config Release
 ctest -C Release
 @if not %errorlevel% == 0 goto Error
 
-@rem #==================================================================
-
+@echo #=======================================================================
 @echo #
 @echo # Compiler: cl
 @echo # Config: Debug
 @echo #
+@echo #=======================================================================
 
 @rem #
 @rem # NB: reuse Visual Studio solution created by previous call to cmake
@@ -64,12 +61,71 @@ cmake --build . --config Debug
 ctest -C Debug
 @if not %errorlevel% == 0 goto Error
 
-@rem #==================================================================
+@rem #========================================================================
+@rem #
+@rem # Intel Parallel Studio may additionally provide clang/clang++ compiler
+@rem # 
+@rem #========================================================================
 
+:TestClang
+
+clang++ --version >NUL
+@if not %errorlevel% == 0 goto TestICL
+
+@rem # TODO: fix testing with clang++
+goto TestICL
+
+@echo #=======================================================================
+@echo #
+@echo # Compiler: clang++
+@echo # Config: Release
+@echo #
+@echo #=======================================================================
+
+del CMakeCache.txt
+cmake ..\.. -G"NMake Makefiles" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release
+@if not %errorlevel% == 0 goto Error
+
+nmake
+@if not %errorlevel% == 0 goto Error
+
+ctest
+@if not %errorlevel% == 0 goto Error
+
+@echo #=======================================================================
+@echo #
+@echo # Compiler: clang++
+@echo # Config: Debug
+@echo #
+@echo #=======================================================================
+
+del CMakeCache.txt
+cmake ..\.. -G"NMake Makefiles" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug
+@if not %errorlevel% == 0 goto Error
+
+nmake
+@if not %errorlevel% == 0 goto Error
+
+ctest
+@if not %errorlevel% == 0 goto Error
+
+@rem #========================================================================
+@rem #
+@rem # Intel Parallel Studio is optional, so check Intel C++ is available
+@rem # 
+@rem #========================================================================
+
+:TestICL
+
+icl /help >NUL
+@if not %errorlevel% == 0 goto Exit
+
+@echo #=======================================================================
 @echo #
 @echo # Compiler: icl
 @echo # Config: Release
 @echo #
+@echo #=======================================================================
 
 del CMakeCache.txt
 cmake ..\.. -G"NMake Makefiles" -DCMAKE_CXX_COMPILER=icl -DCMAKE_BUILD_TYPE=Release
@@ -81,12 +137,12 @@ nmake
 ctest
 @if not %errorlevel% == 0 goto Error
 
-@rem #==================================================================
-
+@echo #=======================================================================
 @echo #
 @echo # Compiler: icl
 @echo # Config: Debug
 @echo #
+@echo #=======================================================================
 
 del CMakeCache.txt
 cmake ..\.. -G"NMake Makefiles" -DCMAKE_CXX_COMPILER=icl -DCMAKE_BUILD_TYPE=Debug
