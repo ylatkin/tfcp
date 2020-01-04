@@ -8,6 +8,7 @@
 
 #include <gtest/gtest.h>
 
+#include <random>
 #include <string>
 
 namespace {
@@ -22,32 +23,51 @@ using TypeName = std::string;
 
 class TestUnitSqrt : public TestWithParam<TypeName> {
 protected:
-    template<typename T>
-    static void test_sqrt(const std::string& typeName) {
-        T x = { 4 }, result;
-        result = tfcp::sqrt(x);
-        EXPECT_EQ(get(result, 0), 2);
+    template<typename T, typename TX>
+    static void test_sqrt(const char typeName[]) {
+        (void)typeName; // unused
+
+        std::mt19937 gen;
+        std::uniform_real_distribution<T> dis(0, 1000);
+
+        // repeat this test 1000 times
+        for (int n = 0; n < 1000; n++)
+        {
+            TX x, result;
+
+            int len = sizeof(TX) / sizeof(T);
+            for (int i = 0; i < len; i++)
+            {
+                get(x, i) = dis(gen);
+            }
+
+            result = tfcp::sqrt(x); // short-vector operation
+
+            for (int i = 0; i < len; i++)
+            {
+                EXPECT_EQ(get(result, i), std::sqrt(get(x, i)));
+            }
+        }
     }
 };
 
 TEST_P(TestUnitSqrt, smoke) {
     auto typeName = GetParam();
 
-    if (typeName == "float") {
-        test_sqrt<float>(typeName);
-    }
-    else if (typeName == "double") {
-        test_sqrt<double>(typeName);
-    }
-    else if (typeName == "floatx") {
-        test_sqrt<floatx>(typeName);
-    }
-    else if (typeName == "doublex") {
-        test_sqrt<doublex>(typeName);
-    }
-    else {
-        FAIL();
-    }
+    #define TESTCASE(T,TX)         \
+        if (typeName == #TX) {     \
+            test_sqrt<T, TX>(#TX); \
+            return;                \
+        }
+
+    TESTCASE(float, float);
+    TESTCASE(float, floatx);
+    TESTCASE(double, double);
+    TESTCASE(double, doublex);
+
+    #undef TESTCASE
+
+    FAIL() << "unknown type: " << typeName;
 }
 
 //----------------------------------------------------------------------

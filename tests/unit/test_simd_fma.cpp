@@ -8,6 +8,9 @@
 
 #include <gtest/gtest.h>
 
+#include <cmath>
+
+#include <random>
 #include <string>
 
 #if !defined(TFCP_SIMD_AVX)
@@ -28,34 +31,57 @@ using namespace testing;
 
 using TypeName = std::string;
 
-class TestUnitFma : public TestWithParam<TypeName> {
+class TestUnitFma : public TestWithParam<TypeName>
+{
 protected:
-    template<typename T>
-    static void test_fma(const std::string& typeName) {
-        T x = { 1 }, y = { 2 }, z = { 3 };
-        T result = tfcp::fmsub(x, y, z);
-        EXPECT_EQ(get(result, 0), -1);
+    template<typename T, typename TX>
+    static void test_fma(const char typeName[])
+    {
+        (void) typeName; // unused
+
+        std::mt19937 gen;
+        std::uniform_real_distribution<T> dis(0, 1000);
+
+        // repeat this test 1000 times
+        for (int n = 0; n < 1000; n++)
+        {
+            TX x, y, z, result;
+
+            int len = sizeof(TX) / sizeof(T);
+            for (int i = 0; i < len; i++)
+            {
+                get(x, i) = dis(gen);
+                get(y, i) = dis(gen);
+                get(z, i) = dis(gen);
+            }
+
+            result = tfcp::fmsub(x, y, z); // short-vector operation
+
+            for (int i = 0; i < len; i++)
+            {
+                EXPECT_EQ(get(result, i), std::fma(get(x, i), get(y, i), -get(z, i)));
+            }
+        }
     }
 };
 
 TEST_P(TestUnitFma, smoke) {
     auto typeName = GetParam();
 
-    if (typeName == "float") {
-        test_fma<float>(typeName);
-    }
-    else if (typeName == "double") {
-        test_fma<double>(typeName);
-    }
-    else if (typeName == "floatx") {
-        test_fma<floatx>(typeName);
-    }
-    else if (typeName == "doublex") {
-        test_fma<doublex>(typeName);
-    }
-    else {
-        FAIL();
-    }
+    #define TESTCASE(T,TX)        \
+        if (typeName == #TX) {    \
+            test_fma<T, TX>(#TX); \
+            return;               \
+        }
+
+    TESTCASE(float, float);
+    TESTCASE(float, floatx);
+    TESTCASE(double, double);
+    TESTCASE(double, doublex);
+
+    #undef TESTCASE
+
+    FAIL() << "unknown type: " << typeName;
 }
 
 //----------------------------------------------------------------------
