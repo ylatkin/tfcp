@@ -157,11 +157,13 @@ namespace tfcp {
     }
     inline float& getx(floatx& x, int i) {
         static constexpr int length = sizeof(floatx) / sizeof(float);
+        (void) length;  // maybe unused, if Release build
         assert(0 <= i && i < length);
         return reinterpret_cast<float *>(&x)[i];
     }
     inline double& getx(doublex& x, int i) {
         static constexpr int length = sizeof(doublex) / sizeof(double);
+        (void) length;  // maybe unused, if Release build
         assert(0 <= i && i < length);
         return reinterpret_cast<double*>(&x)[i];
     }
