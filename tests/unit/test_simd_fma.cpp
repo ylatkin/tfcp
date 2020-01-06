@@ -31,16 +31,16 @@ using namespace testing;
 
 using TypeName = std::string;
 
-class TestUnitFma : public TestWithParam<TypeName>
+class TestUnitSimdFma : public TestWithParam<TypeName>
 {
 protected:
     template<typename T, typename TX>
-    static void test_fma(const char typeName[])
+    static void test_fma(const char type[])
     {
-        (void) typeName; // unused
-
         std::mt19937 gen;
-        std::uniform_real_distribution<T> dis(0, 1000);
+        std::uniform_real_distribution<T> dis(-100, 100);
+
+        int errors = 0;
 
         // repeat this test 1000 times
         for (int n = 0; n < 1000; n++)
@@ -50,22 +50,37 @@ protected:
             int len = sizeof(TX) / sizeof(T);
             for (int i = 0; i < len; i++)
             {
-                get(x, i) = dis(gen);
-                get(y, i) = dis(gen);
-                get(z, i) = dis(gen);
+                getx(x, i) = dis(gen);
+                getx(y, i) = dis(gen);
+                getx(z, i) = dis(gen);
             }
 
-            result = tfcp::fmsub(x, y, z); // short-vector operation
+            result = tfcp::fmsub(x, y, z); // maybe short-vector operation
 
             for (int i = 0; i < len; i++)
             {
-                EXPECT_EQ(get(result, i), std::fma(get(x, i), get(y, i), -get(z, i)));
+                T xi = getx(x, i);
+                T yi = getx(y, i);
+                T zi = getx(z, i);
+                T ri = getx(result, i);       // actual result
+                T ei = std::fma(xi, yi, -zi); // expected
+                if (ri != ei)
+                {
+                    printf("ERROR: type=%s iter=%d i=%d result=%g(%a) expected=%g(%a)\n",
+                           type, n + 1, i, ri, ri, ei, ei);
+                    errors++;
+                    if (errors > 25) {
+                        FAIL() << "too many failures";
+                    }
+                }
             }
         }
+
+        ASSERT_EQ(errors, 0);
     }
 };
 
-TEST_P(TestUnitFma, smoke) {
+TEST_P(TestUnitSimdFma, smoke) {
     auto typeName = GetParam();
 
     #define TESTCASE(T,TX)        \
@@ -88,7 +103,7 @@ TEST_P(TestUnitFma, smoke) {
 
 } // namespace
 
-INSTANTIATE_TEST_SUITE_P(types, TestUnitFma, Values("float",
-                                                    "double",
-                                                    "floatx",
-                                                    "doublex"));
+INSTANTIATE_TEST_SUITE_P(types, TestUnitSimdFma, Values("float",
+                                                        "double",
+                                                        "floatx",
+                                                        "doublex"));

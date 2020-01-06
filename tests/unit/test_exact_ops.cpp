@@ -1,9 +1,10 @@
 //======================================================================
-// 2019 (c) Evgeny Latkin
+// 2019-2020 (c) Evgeny Latkin
 // License: Apache 2.0 (http://www.apache.org/licenses/)
 //======================================================================
 
 #include <tfcp/test_utils.h>
+#include <tfcp/exact.h>
 #include <tfcp/simd.h>
 
 #include <gtest/gtest.h>
@@ -12,11 +13,8 @@
 #include <string>
 #include <tuple>
 
+#include <cmath>
 #include <cstdio>
-
-#if !defined(TFCP_SIMD_AVX)
-#error TFCP_SIMD_AVX undefined! (please enable AVX2)
-#endif
 
 namespace {
 
@@ -25,32 +23,65 @@ using namespace tfcp;
 using namespace testing;
 
 //----------------------------------------------------------------------
+//
+// Reference functions (scalar types): ref_padd0, ref_psub0, ref_pmul0
+//
+//----------------------------------------------------------------------
+
+template<typename T> T ref_padd0(T x, T y, T& r1)
+{
+    if (std::fabs(x) >= std::fabs(y))
+    {
+        return fast_padd0(x, y, r1);
+    }
+    else
+    {
+        return fast_padd0(y, x, r1);
+    }
+}
+
+template<typename T> T ref_psub0(T x, T y, T& r1)
+{
+    if (std::fabs(x) >= std::fabs(y))
+    {
+        return fast_psub0(x, y, r1);
+    }
+    else
+    {
+        T t0, t1;
+        t0 = fast_psub0(y, x, t1);
+        r1 = -t1;
+        return -t0;
+    }
+}
+
+template<typename T> T ref_pmul0(T x, T y, T& r1)
+{
+    return nofma_pmul0(x, y, r1);
+}
+
+//----------------------------------------------------------------------
 
 using TypeName = std::string;
 using   OpName = std::string;
 
 using Params = typename std::tuple<TypeName, OpName>;
 
-class TestUnitSimdOps : public TestWithParam<Params> {
+class TestUnitExactOps : public TestWithParam<Params> {
 private:
-
-    template<typename T> static T add(T x, T y) { return x + y; }
-    template<typename T> static T sub(T x, T y) { return x - y; }
-    template<typename T> static T mul(T x, T y) { return x * y; }
-    template<typename T> static T div(T x, T y) { return x / y; }
 
     template<typename T, typename TX, typename F, typename FX>
     static void test_case(const char type[], const char op[], F f, FX fx)
     {
         std::mt19937 gen;
-        std::uniform_real_distribution<T> dis(0, 1000);
+        std::uniform_real_distribution<T> dis(-10, 10);
 
         int errors = 0;
 
         // repeat this test 1000 times
         for (int n = 0; n < 1000; n++)
         {
-            TX x, y, result;
+            TX x, y, r0, r1;
 
             int len = sizeof(TX) / sizeof(T);
             for (int i = 0; i < len; i++)
@@ -59,18 +90,21 @@ private:
                 getx(y, i) = dis(gen);
             }
 
-            result = fx(x, y); // maybe short-vector operation
+            r0 = fx(x, y, r1); // maybe short-vector operation
 
             for (int i = 0; i < len; i++)
             {
                 T xi = getx(x, i);
                 T yi = getx(y, i);
-                T ri = getx(result, i); // actual result
-                T ei = f(xi, yi);       // expected
-                if (ri != ei)
-                {
-                    printf("ERROR: type=%s op=%s iter=%d i=%d result=%g(%a) expected=%g(%a)\n",
-                           type, op, n+1, i, ri, ri, ei, ei);
+                T r0i, r1i; // actual result
+                T e0i, e1i; // expected
+                r0i = getx(r0, i);
+                r1i = getx(r1, i);
+                e0i = f(xi, yi, e1i);
+                if (r0i != e0i || r1i != e1i) {
+                    printf("ERROR: type=%s op=%s iter=%d i=%d "
+                           "result=%g + %g expected=%g + %g\n",
+                           type, op, n+1, i, r0i, r1i, e0i, e1i);
                     errors++;
                     if (errors > 25) {
                         FAIL() << "too many failures";
@@ -84,22 +118,21 @@ private:
 
 protected:
 
-#define TEST_CASE(OP)                               \
-    template<typename T, typename TX>               \
-    static void test_##OP(const char type[])        \
-    {                                               \
-        test_case<T, TX>(type, #OP, OP<T>, OP<TX>); \
+#define TEST_CASE(OP)                                               \
+    template<typename T, typename TX>                               \
+    static void test_##OP(const char type[])                        \
+    {                                                               \
+        test_case<T, TX>(type, #OP, ref_p##OP##0<T>, p##OP##0<TX>); \
     }
 
     TEST_CASE(add);
     TEST_CASE(sub);
     TEST_CASE(mul);
-    TEST_CASE(div);
 
 #undef TEST_CASE
 };
 
-TEST_P(TestUnitSimdOps, smoke) {
+TEST_P(TestUnitExactOps, smoke) {
     auto param = GetParam();
     auto type = std::get<0>(param);
     auto op   = std::get<1>(param);
@@ -115,7 +148,6 @@ TEST_P(TestUnitSimdOps, smoke) {
         OP_CASE(T, TX, add);            \
         OP_CASE(T, TX, sub);            \
         OP_CASE(T, TX, mul);            \
-        OP_CASE(T, TX, div);            \
         FAIL() << "unknown op: " << op; \
     }
 
@@ -134,12 +166,11 @@ TEST_P(TestUnitSimdOps, smoke) {
 
 } // namespace
 
-INSTANTIATE_TEST_SUITE_P(types, TestUnitSimdOps,
+INSTANTIATE_TEST_SUITE_P(types, TestUnitExactOps,
                          Combine(Values("float",
                                         "double",
                                         "floatx",
                                         "doublex"),
                                  Values("add",
                                         "sub",
-                                        "mul",
-                                        "div")));
+                                        "mul")));

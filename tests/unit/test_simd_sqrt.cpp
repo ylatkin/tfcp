@@ -21,14 +21,14 @@ using namespace testing;
 
 using TypeName = std::string;
 
-class TestUnitSqrt : public TestWithParam<TypeName> {
+class TestUnitSimdSqrt : public TestWithParam<TypeName> {
 protected:
     template<typename T, typename TX>
-    static void test_sqrt(const char typeName[]) {
-        (void)typeName; // unused
-
+    static void test_sqrt(const char type[]) {
         std::mt19937 gen;
         std::uniform_real_distribution<T> dis(0, 1000);
+
+        int errors = 0;
 
         // repeat this test 1000 times
         for (int n = 0; n < 1000; n++)
@@ -38,20 +38,33 @@ protected:
             int len = sizeof(TX) / sizeof(T);
             for (int i = 0; i < len; i++)
             {
-                get(x, i) = dis(gen);
+                getx(x, i) = dis(gen);
             }
 
             result = tfcp::sqrt(x); // short-vector operation
 
             for (int i = 0; i < len; i++)
             {
-                EXPECT_EQ(get(result, i), std::sqrt(get(x, i)));
+                T xi = getx(x, i);
+                T ri = getx(result, i); // actual result
+                T ei = std::sqrt(xi);   // expected
+                if (ri != ei)
+                {
+                    printf("ERROR: type=%s iter=%d i=%d result=%g(%a) expected=%g(%a)\n",
+                           type, n + 1, i, ri, ri, ei, ei);
+                    errors++;
+                    if (errors > 25) {
+                        FAIL() << "too many failures";
+                    }
+                }
             }
         }
+
+        ASSERT_EQ(errors, 0);
     }
 };
 
-TEST_P(TestUnitSqrt, smoke) {
+TEST_P(TestUnitSimdSqrt, smoke) {
     auto typeName = GetParam();
 
     #define TESTCASE(T,TX)         \
@@ -74,7 +87,7 @@ TEST_P(TestUnitSqrt, smoke) {
 
 } // namespace
 
-INSTANTIATE_TEST_SUITE_P(types, TestUnitSqrt, Values("float",
-                                                     "double",
-                                                     "floatx",
-                                                     "doublex"));
+INSTANTIATE_TEST_SUITE_P(types, TestUnitSimdSqrt, Values("float",
+                                                         "double",
+                                                         "floatx",
+                                                         "doublex"));
