@@ -1,5 +1,5 @@
 //======================================================================
-// 2019-2020 (c) Evgeny Latkin
+// 2014-2015, 2019-2020 (c) Evgeny Latkin
 // License: Apache 2.0 (http://www.apache.org/licenses/)
 //======================================================================
 
@@ -226,9 +226,9 @@ namespace tfcp {
     // Twofold: z0 + z1 = x0 / y0
     template<typename T> inline T tdiv0(T x0, T y0, T& z1)
     {
-        T q0, r0, r1;
-        q0 = x0 / y0;             // quotient
-        r0 = fmadd(-q0, y0, x0);  // remainder
+        T q0, r0;
+        q0 = x0 / y0;
+        r0 = fmadd(-q0, y0, x0);  // r = x - q*y
         z1 = r0 / y0;
         return q0;
     }
@@ -238,10 +238,10 @@ namespace tfcp {
     template<typename T> inline T tdivp(T x0, T x1, T y0, T y1, T& z1)
     {
         T q0, r0, r1, r;
-        q0 = x0 / y0;             // quotient
-        r0 = fmadd(-q0, y0, x0);  // remainder
+        q0 = x0 / y0;
+        r0 = fmadd(-q0, y0, x0);  // r = x - q*y
         r1 = fmadd(-q0, y1, x1);
-        r = r0 + r1;              // main part of twofold r0 + r1
+        r = r0 + r1;              // main part of r = r0 + r1
         z1 = r / y0;
         return q0;
     }
