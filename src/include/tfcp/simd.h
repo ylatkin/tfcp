@@ -1,5 +1,5 @@
 //======================================================================
-// 2019 (c) Evgeny Latkin
+// 2019-2020 (c) Evgeny Latkin
 // License: Apache 2.0 (http://www.apache.org/licenses/)
 //======================================================================
 
@@ -120,10 +120,10 @@ namespace tfcp {
         inline doublex operator * (doublex x, doublex y) { return _mm256_mul_pd(x, y); }
         inline doublex operator / (doublex x, doublex y) { return _mm256_div_pd(x, y); }
 
-        #if 0
         inline floatx  operator - (floatx  x) { return _mm256_sub_ps(_mm256_setzero_ps(), x); }
         inline doublex operator - (doublex x) { return _mm256_sub_pd(_mm256_setzero_pd(), x); }
 
+        #if 0
         inline floatx  operator * (float  x, floatx  y) { return _mm256_mul_ps(_mm256_set1_ps(x), y); }
         inline doublex operator * (double x, doublex y) { return _mm256_mul_pd(_mm256_set1_pd(x), y); }
         #endif
@@ -174,6 +174,13 @@ namespace tfcp {
     template<> inline float   setallx(float  x) { return x; }
     template<> inline double  setallx(double x) { return x; }
 
+    // Set short-vector all values equal to zero
+    template<typename TX> inline TX setzerox();
+    template<> inline floatx  setzerox() { return _mm256_setzero_ps(); }
+    template<> inline doublex setzerox() { return _mm256_setzero_pd(); }
+    template<> inline float   setzerox() { return 0; }
+    template<> inline double  setzerox() { return 0; }
+
 } // namespace tfcp
 
 //----------------------------------------------------------------------
@@ -206,7 +213,8 @@ namespace tfcp {
 
 //----------------------------------------------------------------------
 //
-// Define fmsub(x, y, z) as correctly rounded x*y - z
+// Define: fmadd(x, y, z) = x*y + z -- correctly rounded
+//         fmsub(x, y, z) = x*y - z
 //
 //----------------------------------------------------------------------
 
@@ -214,8 +222,25 @@ namespace tfcp {
 
 #if defined(TFCP_SIMD_AVX) && defined(TFCP_SIMD_FMA)
 
+    inline floatx  fmadd(floatx  x, floatx  y, floatx  z) { return _mm256_fmadd_ps(x, y, z); }
+    inline doublex fmadd(doublex x, doublex y, doublex z) { return _mm256_fmadd_pd(x, y, z); }
+
     inline floatx  fmsub(floatx  x, floatx  y, floatx  z) { return _mm256_fmsub_ps(x, y, z); }
     inline doublex fmsub(doublex x, doublex y, doublex z) { return _mm256_fmsub_pd(x, y, z); }
+
+    inline float fmadd(float x, float y, float z) {
+        __m128 result = _mm_fmadd_ss(_mm_set_ss(x),
+            _mm_set_ss(y),
+            _mm_set_ss(z));
+        return _mm_cvtss_f32(result);
+    }
+
+    inline double fmadd(double x, double y, double z) {
+        __m128d result = _mm_fmadd_sd(_mm_set_sd(x),
+            _mm_set_sd(y),
+            _mm_set_sd(z));
+        return _mm_cvtsd_f64(result);
+    }
 
     inline float fmsub(float x, float y, float z) {
         __m128 result = _mm_fmsub_ss(_mm_set_ss(x),
