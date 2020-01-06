@@ -98,14 +98,6 @@
 
 namespace tfcp {
 
-#if 0
-    // Get scalar value from short-vector i'th position
-    template<typename TX, typename T> inline T& getx(TX& x, int i = 0);
-
-    // Set short-vector value at i'th position equal to given scalar
-    template<typename TX, typename T> inline TX setx(T x, int i = 0);
-#endif
-
 #if defined(TFCP_SIMD_AVX)
 
     #if defined(TFCP_SIMD_GCC)
