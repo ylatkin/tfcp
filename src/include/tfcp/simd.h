@@ -98,6 +98,14 @@
 
 namespace tfcp {
 
+#if 0
+    // Get scalar value from short-vector i'th position
+    template<typename TX, typename T> inline T& getx(TX& x, int i = 0);
+
+    // Set short-vector value at i'th position equal to given scalar
+    template<typename TX, typename T> inline TX setx(T x, int i = 0);
+#endif
+
 #if defined(TFCP_SIMD_AVX)
 
     #if defined(TFCP_SIMD_GCC)
@@ -105,30 +113,10 @@ namespace tfcp {
         typedef float  floatx  __attribute__((vector_size(32), aligned(32)));
         typedef double doublex __attribute__((vector_size(32), aligned(32)));
 
-        inline float& get(floatx& x, int i = 0) {
-            assert(0 <= i && i < 8);
-            return ((float*)& x)[i]; // clang++ compiler error if just x[i]
-        }
-
-        inline double& get(doublex& x, int i = 0) {
-            assert(0 <= i && i < 4);
-            return ((double*)& x)[i]; // clang++ compiler error if just x[i]
-        }
-
     #elif defined(TFCP_SIMD_MSC)
 
         typedef __m256  floatx;
         typedef __m256d doublex;
-
-        inline float& get(floatx& x, int i = 0) {
-            assert(0 <= i && i < 8);
-            return x.m256_f32[i];
-        }
-
-        inline double& get(doublex& x, int i = 0) {
-            assert(0 <= i && i < 4);
-            return x.m256d_f64[i];
-        }
 
         inline floatx operator + (floatx x, floatx y) { return _mm256_add_ps(x, y); }
         inline floatx operator - (floatx x, floatx y) { return _mm256_sub_ps(x, y); }
@@ -140,11 +128,13 @@ namespace tfcp {
         inline doublex operator * (doublex x, doublex y) { return _mm256_mul_pd(x, y); }
         inline doublex operator / (doublex x, doublex y) { return _mm256_div_pd(x, y); }
 
+        #if 0
         inline floatx  operator - (floatx  x) { return _mm256_sub_ps(_mm256_setzero_ps(), x); }
         inline doublex operator - (doublex x) { return _mm256_sub_pd(_mm256_setzero_pd(), x); }
 
         inline floatx  operator * (float  x, floatx  y) { return _mm256_mul_ps(_mm256_set1_ps(x), y); }
         inline doublex operator * (double x, doublex y) { return _mm256_mul_pd(_mm256_set1_pd(x), y); }
+        #endif
 
     #else
         #error Unsupported compiler!
@@ -163,6 +153,34 @@ namespace tfcp {
         assert(i == 0);
         return x;
     }
+
+    // Get short-vertor i'th position (by reference)
+    inline float& getx(float& x, int i) {
+        assert(i == 0);
+        return x;
+    }
+    inline double& getx(double& x, int i) {
+        assert(i == 0);
+        return x;
+    }
+    inline float& getx(floatx& x, int i) {
+        static constexpr int length = sizeof(floatx) / sizeof(float);
+        assert(0 <= i && i < length);
+        return reinterpret_cast<float *>(&x)[i];
+    }
+    inline double& getx(doublex& x, int i) {
+        static constexpr int length = sizeof(doublex) / sizeof(double);
+        assert(0 <= i && i < length);
+        return reinterpret_cast<double*>(&x)[i];
+    }
+
+    // Set short-vector all values equal to given scalar
+    // NB: template, so can use like setallx<type>(value)
+    template<typename TX, typename T> inline TX setallx(T x);
+    template<> inline floatx  setallx(float  x) { return _mm256_set1_ps(x); }
+    template<> inline doublex setallx(double x) { return _mm256_set1_pd(x); }
+    template<> inline float   setallx(float  x) { return x; }
+    template<> inline double  setallx(double x) { return x; }
 
 } // namespace tfcp
 

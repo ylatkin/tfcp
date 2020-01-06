@@ -16,6 +16,14 @@ namespace tfcp {
     // Yet no TFCP test utilities
     //
 
+#if 0
+    template<typename TX> struct traitx {};
+    template<> struct traitx<float> { using base = float; };
+    template<> struct traitx<floatx> { using base = float; };
+    template<> struct traitx<double> { using base = double; };
+    template<> struct traitx<doublex> { using base = double; };
+#endif
+
 } // namespace tfcp
 
 //======================================================================
