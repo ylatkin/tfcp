@@ -88,8 +88,6 @@
     #error AVX is required!
 #endif
 
-#include <cassert>
-
 //----------------------------------------------------------------------
 //
 // Define floatx/doublex for target compiler and hardware
@@ -135,38 +133,6 @@ namespace tfcp {
 #else
     #error AVX is required!
 #endif
-
-    inline float& get(float& x, int i = 0) {
-        assert(i == 0);
-        return x;
-    }
-
-    inline double& get(double& x, int i = 0) {
-        assert(i == 0);
-        return x;
-    }
-
-    // Get short-vertor i'th position (by reference)
-    inline float& getx(float& x, int i) {
-        assert(i == 0);
-        return x;
-    }
-    inline double& getx(double& x, int i) {
-        assert(i == 0);
-        return x;
-    }
-    inline float& getx(floatx& x, int i) {
-        static constexpr int length = sizeof(floatx) / sizeof(float);
-        (void) length;  // maybe unused, if Release build
-        assert(0 <= i && i < length);
-        return reinterpret_cast<float *>(&x)[i];
-    }
-    inline double& getx(doublex& x, int i) {
-        static constexpr int length = sizeof(doublex) / sizeof(double);
-        (void) length;  // maybe unused, if Release build
-        assert(0 <= i && i < length);
-        return reinterpret_cast<double*>(&x)[i];
-    }
 
     // Set short-vector all values equal to given scalar
     // NB: template, so can use like setallx<type>(value)
@@ -224,21 +190,21 @@ namespace tfcp {
 
 #if defined(TFCP_SIMD_AVX) && defined(TFCP_SIMD_FMA)
 
-    inline floatx  fmadd(floatx  x, floatx  y, floatx  z) { return _mm256_fmadd_ps(x, y, z); }
-    inline doublex fmadd(doublex x, doublex y, doublex z) { return _mm256_fmadd_pd(x, y, z); }
+    inline floatx  fnmadd(floatx  x, floatx  y, floatx  z) { return _mm256_fnmadd_ps(x, y, z); }
+    inline doublex fnmadd(doublex x, doublex y, doublex z) { return _mm256_fnmadd_pd(x, y, z); }
 
     inline floatx  fmsub(floatx  x, floatx  y, floatx  z) { return _mm256_fmsub_ps(x, y, z); }
     inline doublex fmsub(doublex x, doublex y, doublex z) { return _mm256_fmsub_pd(x, y, z); }
 
-    inline float fmadd(float x, float y, float z) {
-        __m128 result = _mm_fmadd_ss(_mm_set_ss(x),
+    inline float fnmadd(float x, float y, float z) {
+        __m128 result = _mm_fnmadd_ss(_mm_set_ss(x),
             _mm_set_ss(y),
             _mm_set_ss(z));
         return _mm_cvtss_f32(result);
     }
 
-    inline double fmadd(double x, double y, double z) {
-        __m128d result = _mm_fmadd_sd(_mm_set_sd(x),
+    inline double fnmadd(double x, double y, double z) {
+        __m128d result = _mm_fnmadd_sd(_mm_set_sd(x),
             _mm_set_sd(y),
             _mm_set_sd(z));
         return _mm_cvtsd_f64(result);

@@ -189,9 +189,9 @@ namespace tfcp {
     template<typename T> inline T tdiv(T x0, T x1, T y0, T y1, T& z1)
     {
         T q0, r0, r1, r, y;
-        q0 = x0 / y0;             // quotient
-        r0 = fmadd(-q0, y0, x0);  // remainder
-        r1 = fmadd(-q0, y1, x1);
+        q0 = x0 / y0;
+        r0 = fnmadd(q0, y0, x0);  // r = x - q0*y
+        r1 = fnmadd(q0, y1, x1);
         r = r0 + r1;              // main part of twofold r0 + r1
         y = y0 + y1;
         z1 = r / y;
@@ -202,10 +202,10 @@ namespace tfcp {
     template<typename T> inline T tdiv1(T x0, T x1, T y0, T& z1)
     {
         T q0, r0, r1, r;
-        q0 = x0 / y0;             // quotient
-        r0 = fmadd(-q0, y0, x0);  // remainder
+        q0 = x0 / y0;
+        r0 = fnmadd(q0, y0, x0);  // r = x - q0*y
         r1 = x1;
-        r = r0 + r1;              // main part
+        r = r0 + r1;              // main part of remainder
         z1 = r / y0;
         return q0;
     }
@@ -214,10 +214,10 @@ namespace tfcp {
     template<typename T> inline T tdiv2(T x0, T y0, T y1, T& z1)
     {
         T q0, r0, r1, r, y;
-        q0 = x0 / y0;             // quotient
-        r0 = fmadd(-q0, y0, x0);  // remainder
+        q0 = x0 / y0;
+        r0 = fnmadd(q0, y0, x0);  // r = x - q0*y
         r1 =       -q0 * y1;
-        r = r0 + r1;              // main part of twofold r0 + r1
+        r = r0 + r1;              // main part remainder
         y = y0 + y1;
         z1 = r / y;
         return q0;
@@ -228,7 +228,7 @@ namespace tfcp {
     {
         T q0, r0;
         q0 = x0 / y0;
-        r0 = fmadd(-q0, y0, x0);  // r = x - q*y
+        r0 = fnmadd(q0, y0, x0);  // r = x - q0*y
         z1 = r0 / y0;
         return q0;
     }
@@ -239,9 +239,9 @@ namespace tfcp {
     {
         T q0, r0, r1, r;
         q0 = x0 / y0;
-        r0 = fmadd(-q0, y0, x0);  // r = x - q*y
-        r1 = fmadd(-q0, y1, x1);
-        r = r0 + r1;              // main part of r = r0 + r1
+        r0 = fnmadd(q0, y0, x0);  // r = x - q0*y
+        r1 = fnmadd(q0, y1, x1);
+        r = r0 + r1;              // main part of remainder
         z1 = r / y0;
         return q0;
     }
@@ -257,7 +257,7 @@ namespace tfcp {
     {
         T r0, r1;
         r0 = sqrt(x0);
-        r1 = fmadd(-r0, r0, x0);  // r0 + r1 = x0 - sqrt(x0)^2
+        r1 = fnmadd(r0, r0, x0);  // r = x - sqrt(x)^2
         z1 = r1 / (r0 + r0);      // Newton iteration
         return r0;
     }
@@ -268,7 +268,7 @@ namespace tfcp {
     {
         T r0, r1;
         r0 = sqrt(x0);
-        r1 = fmadd(-r0, r0, x0) + x1;  // r = x - sqrt(x)^2
+        r1 = fnmadd(r0, r0, x0) + x1;  // r = x - sqrt(x)^2
         z1 = r1 / (r0 + r0);           // Newton iteration
         return r0;
     }
