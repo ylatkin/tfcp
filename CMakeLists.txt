@@ -9,7 +9,7 @@ project(TFCP CXX)
 
 # Local copy:
 # - googletest (no googlemock)
-set(GTEST_SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/googletest)
+set(GTEST_SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/googletest/googletest)
 
 set(TFCP_SOURCE_DIR ${CMAKE_SOURCE_DIR})
 
