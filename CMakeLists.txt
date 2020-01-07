@@ -1,8 +1,3 @@
-#======================================================================
-# 2019 (c) Evgeny Latkin
-# License: Apache 2.0 (http://www.apache.org/licenses/)
-#======================================================================
-
 # Build:
 # - tfcp library
 # - unit tests
@@ -10,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.0)
 
-project(tfcp CXX)
+project(TFCP CXX)
 
 # Local copy:
 # - googletest (no googlemock)

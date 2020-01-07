@@ -1,7 +1,4 @@
 @rem #==================================================================
-@rem # 2019 (c) Evgeny Latkin
-@rem # License: Apache 2.0 (http://www.apache.org/licenses/)
-@rem #==================================================================
 @rem #
 @rem # Example of build-and-test script
 @rem #
@@ -64,7 +61,7 @@ ctest -C Debug
 @rem #========================================================================
 @rem #
 @rem # Intel Parallel Studio may additionally provide clang/clang++ compiler
-@rem # 
+@rem #
 @rem #========================================================================
 
 :TestClang
@@ -112,7 +109,7 @@ ctest
 @rem #========================================================================
 @rem #
 @rem # Intel Parallel Studio is optional, so check Intel C++ is available
-@rem # 
+@rem #
 @rem #========================================================================
 
 :TestICL

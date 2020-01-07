@@ -1,12 +1,7 @@
-#======================================================================
-# 2019 (c) Evgeny Latkin
-# License: Apache 2.0 (http://www.apache.org/licenses/)
-#======================================================================
-
 # Build:
 # - unit_tests application
 #
-# NB: added to CTest at top-level CMake
+# Added to CTest at top-level CMake
 
 file(GLOB sources *.cpp)
 
