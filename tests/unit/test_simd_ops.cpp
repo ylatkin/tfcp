@@ -32,7 +32,7 @@ using   OpName = std::string;
 using Params = typename std::tuple<TypeName, OpName>;
 
 class TestUnitSimdOps : public TestWithParam<Params> {
-private:
+protected:
 
     template<typename T> static T add(T x, T y) { return x + y; }
     template<typename T> static T sub(T x, T y) { return x - y; }
@@ -81,22 +81,6 @@ private:
 
         ASSERT_EQ(errors, 0);
     }
-
-protected:
-
-#define TEST_CASE(OP)                               \
-    template<typename T, typename TX>               \
-    static void test_##OP(const char type[])        \
-    {                                               \
-        test_case<T, TX>(type, #OP, OP<T>, OP<TX>); \
-    }
-
-    TEST_CASE(add);
-    TEST_CASE(sub);
-    TEST_CASE(mul);
-    TEST_CASE(div);
-
-#undef TEST_CASE
 };
 
 TEST_P(TestUnitSimdOps, smoke) {
@@ -104,10 +88,10 @@ TEST_P(TestUnitSimdOps, smoke) {
     auto type = std::get<0>(param);
     auto op   = std::get<1>(param);
 
-#define OP_CASE(T, TX, OP)    \
-    if (op == #OP) {          \
-        test_##OP<T,TX>(#TX); \
-        return;               \
+#define OP_CASE(T, TX, OP)                         \
+    if (op == #OP) {                               \
+        test_case<T, TX>(#TX, #OP, OP<T>, OP<TX>); \
+        return;                                    \
     }
 
 #define TYPE_CASE(T, TX)                \
