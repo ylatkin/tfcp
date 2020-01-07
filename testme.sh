@@ -1,32 +1,39 @@
+if [ "$1" == "" ]; then
+    echo "#======================================================================="
+    echo "#"
+    echo "# Example of build-and-test script"
+    echo "#"
+    echo "# Builds TFCP library and tests and examples, and runs tests"
+    echo "#"
+    echo "# Compilers:"
+    echo "# - GNU g++"
+    echo "# - clang++"
+    echo "# - icc (Intel C++)"
+    echo "#"
+    echo "# Configs:"
+    echo "# - Release"
+    echo "# - Debug"
+    echo "#"
+    echo "# Run it from from your build folder, and give it path to TFCP sources"
+    echo "# E.g.:"
+    echo "#"
+    echo "#   cd \$TFCP_SOURCE_DIR"
+    echo "#   mkdir -p build/linux"
+    echo "#   cd build/linux"
+    echo "#   ../../testme.sh \$TFCP_SOURCE_DIR"
+    echo "#"
+    echo "#======================================================================="
+	exit 0
+fi
 
-#=======================================================================
-#
-# Example of build-and-test script
-#
-# Builds TFCP library and tests and examples, and runs tests
-#
-# Compilers:
-# - GNU g++
-# - clang++
-# - icc (Intel C++)
-#
-# Configs:
-# - Release
-# - Debug
-#
-# Run this script from TFCP project's root folder
-#
+TFCP_SOURCE_DIR=$1
+
 #=======================================================================
 
 execute() {
     echo $*
 	$*
 }
-
-mkdir -p build/linux
-execute cd build/linux || exit $?
-
-#=======================================================================
 
 testme() {
     echo "#======================================================================="
@@ -38,7 +45,7 @@ testme() {
 
     execute rm CMakeCache.txt
 
-    execute cmake ../.. -DCMAKE_CXX_COMPILER=$1 -DCMAKE_BUILD_TYPE=$2 || exit $?
+    execute cmake $TFCP_SOURCE_DIR -DCMAKE_CXX_COMPILER=$1 -DCMAKE_BUILD_TYPE=$2 || exit $?
 
     execute make -j4 || exit $?
 

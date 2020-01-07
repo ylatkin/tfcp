@@ -1,28 +1,35 @@
-@rem #==================================================================
-@rem #
-@rem # Example of build-and-test script
-@rem #
-@rem # Builds TFCP library and tests and examples, and runs tests
-@rem #
-@rem # Compilers:
-@rem # - Microsoft C++
-@rem # - Intel C++
-@rem #
-@rem # Configs:
-@rem # - Release
-@rem # - Debug
-@rem #
-@rem # Run this script from TFCP project's root folder
-@rem #
-@rem #==================================================================
+@if not "%1" == "" (
+    set TFCP_SOURCE_DIR=%1
+    goto TestCL
+)
 
-@rem Current directory
-@set TFCP_ROOT=%cd%
+@echo #==================================================================
+@echo #
+@echo # Example of build-and-test script
+@echo #
+@echo # Builds TFCP library and tests and examples, and runs tests
+@echo #
+@echo # Compilers:
+@echo # - Microsoft C++
+@echo # - Intel C++
+@echo #
+@echo # Configs:
+@echo # - Release
+@echo # - Debug
+@echo #
+@echo # Run from your build folder and give it path to TFCP sources
+@echo # E.g.:
+@echo #   
+@echo #   cd %%TFCP_SOURCE_DIR%%
+@echo #   mkdir build\windows
+@echo #   cd build\windows
+@echo #   ..\..\testme.bat %%TFCP_SOURCE_DIR%%
+@echo #
+@echo #==================================================================
 
-mkdir build
-mkdir build\windows
-cd build\windows
-@if not %errorlevel% == 0 goto Error
+@goto Exit
+
+:TestCL
 
 @echo #=======================================================================
 @echo #
@@ -32,7 +39,7 @@ cd build\windows
 @echo #=======================================================================
 
 del CMakeCache.txt
-cmake ..\..
+cmake %TFCP_SOURCE_DIR%
 @if not %errorlevel% == 0 goto Error
 
 cmake --build . --config Release
@@ -49,7 +56,7 @@ ctest -C Release
 @echo #=======================================================================
 
 @rem #
-@rem # NB: reuse Visual Studio solution created by previous call to cmake
+@rem # Reuse Visual Studio solution created by previous call to cmake
 @rem #
 
 cmake --build . --config Debug
@@ -80,7 +87,7 @@ goto TestICL
 @echo #=======================================================================
 
 del CMakeCache.txt
-cmake ..\.. -G"NMake Makefiles" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release
+cmake %TFCP_SOURCE_DIR% -G"NMake Makefiles" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release
 @if not %errorlevel% == 0 goto Error
 
 nmake
@@ -97,7 +104,7 @@ ctest
 @echo #=======================================================================
 
 del CMakeCache.txt
-cmake ..\.. -G"NMake Makefiles" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug
+cmake %TFCP_SOURCE_DIR% -G"NMake Makefiles" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug
 @if not %errorlevel% == 0 goto Error
 
 nmake
@@ -125,7 +132,7 @@ icl /help >NUL
 @echo #=======================================================================
 
 del CMakeCache.txt
-cmake ..\.. -G"NMake Makefiles" -DCMAKE_CXX_COMPILER=icl -DCMAKE_BUILD_TYPE=Release
+cmake %TFCP_SOURCE_DIR% -G"NMake Makefiles" -DCMAKE_CXX_COMPILER=icl -DCMAKE_BUILD_TYPE=Release
 @if not %errorlevel% == 0 goto Error
 
 nmake
@@ -142,7 +149,7 @@ ctest
 @echo #=======================================================================
 
 del CMakeCache.txt
-cmake ..\.. -G"NMake Makefiles" -DCMAKE_CXX_COMPILER=icl -DCMAKE_BUILD_TYPE=Debug
+cmake %TFCP_SOURCE_DIR% -G"NMake Makefiles" -DCMAKE_CXX_COMPILER=icl -DCMAKE_BUILD_TYPE=Debug
 @if not %errorlevel% == 0 goto Error
 
 nmake
@@ -162,4 +169,3 @@ ctest
 
 :Exit
 @rem Exit silently
-@cd %TFCP_ROOT%
