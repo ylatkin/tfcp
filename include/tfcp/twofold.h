@@ -298,9 +298,12 @@ namespace tfcp {
         twofold() {}
         twofold(T value, T error) { shaped<T>::init(value, error); }
     public:
-        template<typename S> twofold(              S   x) { shaped<T>::init(tbyd<T, S>(x)); }
-        template<typename S> twofold(const twofold<S>& x) { shaped<T>::init(tbyt<T, S>(x)); }
-        template<typename S> twofold(const coupled<S>& x) { shaped<T>::init(tbyp<T, S>(x)); }
+        twofold(              double   x) { shaped<T>::init(tbyd<T, double>(x)); }
+        twofold(const twofold<double>& x) { shaped<T>::init(tbyt<T, double>(x)); }
+        twofold(const coupled<double>& x) { shaped<T>::init(tbyp<T, double>(x)); }
+        twofold(              float    x) { shaped<T>::init(tbyd<T,  float>(x)); }
+        twofold(const twofold<float> & x) { shaped<T>::init(tbyt<T,  float>(x)); }
+        twofold(const coupled<float> & x) { shaped<T>::init(tbyp<T,  float>(x)); }
     public:
         template<typename S> operator         S () { return dbyt<S, T>(*this); }
         template<typename S> operator twofold<S>() { return tbyt<S, T>(*this); }
@@ -327,9 +330,12 @@ namespace tfcp {
         coupled() {}
         coupled(T value, T error) { shaped<T>::init(value, error); }
     public:
-        template<typename S> coupled(              S   x) { shaped<T>::init(pbyd<T, S>(x));}
-        template<typename S> coupled(const twofold<S>& x) { shaped<T>::init(pbyt<T, S>(x));}
-        template<typename S> coupled(const coupled<S>& x) { shaped<T>::init(pbyp<T, S>(x));}
+        coupled(              double   x) { shaped<T>::init(pbyd<T, double>(x));}
+        coupled(const twofold<double>& x) { shaped<T>::init(pbyt<T, double>(x));}
+        coupled(const coupled<double>& x) { shaped<T>::init(pbyp<T, double>(x));}
+        coupled(              float    x) { shaped<T>::init(pbyd<T,  float>(x));}
+        coupled(const twofold<float> & x) { shaped<T>::init(pbyt<T,  float>(x));}
+        coupled(const coupled<float> & x) { shaped<T>::init(pbyp<T,  float>(x));}
     public:
         template<typename S> operator         S () { return dbyp<S, T>(*this); }
         template<typename S> operator twofold<S>() { return tbyp<S, T>(*this); }
@@ -377,9 +383,9 @@ namespace tfcp {
     inline float  sqrt(float  x) { return std::sqrt(x); }
 
 #define TFCP_ARITHM_SAME_TYPE(OP, F, PREFIX, SHAPE, T) \
-    inline SHAPE<T> operator OP(const SHAPE<T>& x, const SHAPE<T>& y) { return PREFIX ## F(x, y); } \
-    inline SHAPE<T> operator OP(const SHAPE<T>& x,             T   y) { return PREFIX ## F(x, y); } \
-    inline SHAPE<T> operator OP(            T   x, const SHAPE<T>& y) { return PREFIX ## F(x, y); }
+    inline SHAPE<T> operator OP(const SHAPE<T>& x, const SHAPE<T>& y) { return PREFIX ## bys(PREFIX ## F(x, y)); } \
+    inline SHAPE<T> operator OP(const SHAPE<T>& x,             T   y) { return PREFIX ## bys(PREFIX ## F(x, y)); } \
+    inline SHAPE<T> operator OP(            T   x, const SHAPE<T>& y) { return PREFIX ## bys(PREFIX ## F(x, y)); }
     TFCP_ARITHM_SAME_TYPE(+, add, t, twofold, double);
     TFCP_ARITHM_SAME_TYPE(-, sub, t, twofold, double);
     TFCP_ARITHM_SAME_TYPE(*, mul, t, twofold, double);
