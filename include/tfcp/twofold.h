@@ -305,24 +305,39 @@ namespace tfcp {
         twofold(const twofold<float> & x) { shaped<T>::init(tbyt<T,  float>(x)); }
         twofold(const coupled<float> & x) { shaped<T>::init(tbyp<T,  float>(x)); }
     public:
-        template<typename S> operator         S () { return dbyt<S, T>(*this); }
-        template<typename S> operator twofold<S>() { return tbyt<S, T>(*this); }
-        template<typename S> operator coupled<S>() { return pbyt<S, T>(*this); }
+        operator         double ();
+        operator twofold<double>();
+        operator coupled<double>();
+        operator         float ();
+        operator twofold<float>();
+        operator coupled<float>();
     public:
-        template<typename S> twofold& operator += (S x);
-        template<typename S> twofold& operator -= (S x);
-        template<typename S> twofold& operator *= (S x);
-        template<typename S> twofold& operator /= (S x);
+        twofold& operator += (double x);
+        twofold& operator -= (double x);
+        twofold& operator *= (double x);
+        twofold& operator /= (double x);
+        twofold& operator += (float x);
+        twofold& operator -= (float x);
+        twofold& operator *= (float x);
+        twofold& operator /= (float x);
     public:
-        template<typename S> twofold& operator += (const twofold<S>& x);
-        template<typename S> twofold& operator -= (const twofold<S>& x);
-        template<typename S> twofold& operator *= (const twofold<S>& x);
-        template<typename S> twofold& operator /= (const twofold<S>& x);
+        twofold& operator += (const twofold<double>& x);
+        twofold& operator -= (const twofold<double>& x);
+        twofold& operator *= (const twofold<double>& x);
+        twofold& operator /= (const twofold<double>& x);
+        twofold& operator += (const twofold<float> & x);
+        twofold& operator -= (const twofold<float> & x);
+        twofold& operator *= (const twofold<float> & x);
+        twofold& operator /= (const twofold<float> & x);
     public:
-        template<typename S> twofold& operator += (const coupled<S>& x);
-        template<typename S> twofold& operator -= (const coupled<S>& x);
-        template<typename S> twofold& operator *= (const coupled<S>& x);
-        template<typename S> twofold& operator /= (const coupled<S>& x);
+        twofold& operator += (const coupled<double>& x);
+        twofold& operator -= (const coupled<double>& x);
+        twofold& operator *= (const coupled<double>& x);
+        twofold& operator /= (const coupled<double>& x);
+        twofold& operator += (const coupled<float> & x);
+        twofold& operator -= (const coupled<float> & x);
+        twofold& operator *= (const coupled<float> & x);
+        twofold& operator /= (const coupled<float> & x);
     };
 
     template<typename T> struct coupled: public shaped<T> {
@@ -337,25 +352,60 @@ namespace tfcp {
         coupled(const twofold<float> & x) { shaped<T>::init(pbyt<T,  float>(x));}
         coupled(const coupled<float> & x) { shaped<T>::init(pbyp<T,  float>(x));}
     public:
-        template<typename S> operator         S () { return dbyp<S, T>(*this); }
-        template<typename S> operator twofold<S>() { return tbyp<S, T>(*this); }
-        template<typename S> operator coupled<S>() { return pbyp<S, T>(*this); }
+        operator         double ();
+        operator twofold<double>();
+        operator coupled<double>();
+        operator         float ();
+        operator twofold<float>();
+        operator coupled<float>();
     public:
-        template<typename S> coupled& operator += (S x);
-        template<typename S> coupled& operator -= (S x);
-        template<typename S> coupled& operator *= (S x);
-        template<typename S> coupled& operator /= (S x);
+        coupled& operator += (double x);
+        coupled& operator -= (double x);
+        coupled& operator *= (double x);
+        coupled& operator /= (double x);
+        coupled& operator += (float x);
+        coupled& operator -= (float x);
+        coupled& operator *= (float x);
+        coupled& operator /= (float x);
     public:
-        template<typename S> coupled& operator += (const twofold<S>& x);
-        template<typename S> coupled& operator -= (const twofold<S>& x);
-        template<typename S> coupled& operator *= (const twofold<S>& x);
-        template<typename S> coupled& operator /= (const twofold<S>& x);
+        coupled& operator += (const coupled<double>& x);
+        coupled& operator -= (const coupled<double>& x);
+        coupled& operator *= (const coupled<double>& x);
+        coupled& operator /= (const coupled<double>& x);
+        coupled& operator += (const coupled<float> & x);
+        coupled& operator -= (const coupled<float> & x);
+        coupled& operator *= (const coupled<float> & x);
+        coupled& operator /= (const coupled<float> & x);
     public:
-        template<typename S> coupled& operator += (const coupled<S>& x);
-        template<typename S> coupled& operator -= (const coupled<S>& x);
-        template<typename S> coupled& operator *= (const coupled<S>& x);
-        template<typename S> coupled& operator /= (const coupled<S>& x);
+        coupled& operator += (const twofold<double>& x);
+        coupled& operator -= (const twofold<double>& x);
+        coupled& operator *= (const twofold<double>& x);
+        coupled& operator /= (const twofold<double>& x);
+        coupled& operator += (const twofold<float> & x);
+        coupled& operator -= (const twofold<float> & x);
+        coupled& operator *= (const twofold<float> & x);
+        coupled& operator /= (const twofold<float> & x);
     };
+
+    //------------------------------------------------------------------
+    //
+    //  Static cast across shapes
+    //
+    //------------------------------------------------------------------
+
+    template<typename T> inline twofold<T>::operator         double () { return dbyt<double, T>(*this); }
+    template<typename T> inline twofold<T>::operator twofold<double>() { return tbyt<double, T>(*this); }
+    template<typename T> inline twofold<T>::operator coupled<double>() { return pbyt<double, T>(*this); }
+    template<typename T> inline twofold<T>::operator         float ()  { return dbyt<float,  T>(*this); }
+    template<typename T> inline twofold<T>::operator twofold<float>()  { return tbyt<float,  T>(*this); }
+    template<typename T> inline twofold<T>::operator coupled<float>()  { return pbyt<float,  T>(*this); }
+
+    template<typename T> inline coupled<T>::operator         double () { return dbyp<double, T>(*this); }
+    template<typename T> inline coupled<T>::operator twofold<double>() { return tbyp<double, T>(*this); }
+    template<typename T> inline coupled<T>::operator coupled<double>() { return pbyp<double, T>(*this); }
+    template<typename T> inline coupled<T>::operator         float ()  { return dbyp<float,  T>(*this); }
+    template<typename T> inline coupled<T>::operator twofold<float>()  { return tbyp<float,  T>(*this); }
+    template<typename T> inline coupled<T>::operator coupled<float>()  { return pbyp<float,  T>(*this); }
 
     //------------------------------------------------------------------
     //
@@ -467,18 +517,26 @@ namespace tfcp {
     //
     //------------------------------------------------------------------
 
-#define TFCP_ARITHM_SELF(SHAPE, OP) \
-    template<typename T> template<typename S> inline SHAPE<T>& SHAPE<T>::operator OP##=(              S   x) { return *this = *this OP x; } \
-    template<typename T> template<typename S> inline SHAPE<T>& SHAPE<T>::operator OP##=(const twofold<S>& x) { return *this = *this OP x; } \
-    template<typename T> template<typename S> inline SHAPE<T>& SHAPE<T>::operator OP##=(const coupled<S>& x) { return *this = *this OP x; }
-    TFCP_ARITHM_SELF(twofold, +);
-    TFCP_ARITHM_SELF(twofold, -);
-    TFCP_ARITHM_SELF(twofold, *);
-    TFCP_ARITHM_SELF(twofold, /);
-    TFCP_ARITHM_SELF(coupled, +);
-    TFCP_ARITHM_SELF(coupled, -);
-    TFCP_ARITHM_SELF(coupled, *);
-    TFCP_ARITHM_SELF(coupled, /);
+#define TFCP_ARITHM_SELF(OP, SHAPE, S) \
+    template<typename T> inline SHAPE<T>& SHAPE<T>::operator OP##=(              S   x) { return *this = *this OP x; } \
+    template<typename T> inline SHAPE<T>& SHAPE<T>::operator OP##=(const twofold<S>& x) { return *this = *this OP x; } \
+    template<typename T> inline SHAPE<T>& SHAPE<T>::operator OP##=(const coupled<S>& x) { return *this = *this OP x; }
+    TFCP_ARITHM_SELF(+, twofold, double);
+    TFCP_ARITHM_SELF(-, twofold, double);
+    TFCP_ARITHM_SELF(*, twofold, double);
+    TFCP_ARITHM_SELF(/, twofold, double);
+    TFCP_ARITHM_SELF(+, coupled, double);
+    TFCP_ARITHM_SELF(-, coupled, double);
+    TFCP_ARITHM_SELF(*, coupled, double);
+    TFCP_ARITHM_SELF(/, coupled, double);
+    TFCP_ARITHM_SELF(+, twofold, float);
+    TFCP_ARITHM_SELF(-, twofold, float);
+    TFCP_ARITHM_SELF(*, twofold, float);
+    TFCP_ARITHM_SELF(/, twofold, float);
+    TFCP_ARITHM_SELF(+, coupled, float);
+    TFCP_ARITHM_SELF(-, coupled, float);
+    TFCP_ARITHM_SELF(*, coupled, float);
+    TFCP_ARITHM_SELF(/, coupled, float);
 #undef TFCP_ARITHM_SELF
 
     //------------------------------------------------------------------
