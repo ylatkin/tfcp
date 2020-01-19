@@ -63,13 +63,16 @@ namespace tfcp {
     //------------------------------------------------------------------
 
     // Assume T, S is float or double
-    template<typename T> struct shaped {
+    template<typename T,
+             typename = std::enable_if<std::is_same<T, float>::value ||
+                                       std::is_same<T, double>::value>>
+    struct shaped {
     public:
-        T value;
-        T error;
+        T value = 0;
+        T error = 0;
     public:
-        shaped()                              { check_type(); }
-        shaped(T v, T e) : value(v), error(e) { check_type(); }
+        shaped() {}
+        shaped(T v, T e) : value(v), error(e) {}
     public:
         void init(T v, T e) {
             value = v;
@@ -78,12 +81,6 @@ namespace tfcp {
         void init(const shaped<T>& x) {
             value = x.value;
             error = x.error;
-        }
-    private:
-        void check_type() {
-            static_assert(std::is_same<T, float>::value ||
-                          std::is_same<T, double>::value,
-                          "unsupported base type");
         }
     };
 
@@ -485,19 +482,27 @@ namespace tfcp {
     //------------------------------------------------------------------
 
     // Unary operator +
-    template<typename T> twofold<T> operator + (const twofold<T>& x) { return x; }
-    template<typename T> coupled<T> operator + (const coupled<T>& x) { return x; }
+    inline twofold<double> operator + (const twofold<double>& x) { return x; }
+    inline coupled<double> operator + (const coupled<double>& x) { return x; }
+    inline twofold<float>  operator + (const twofold<float> & x) { return x; }
+    inline coupled<float>  operator + (const coupled<float> & x) { return x; }
 
     // Unary operator -
-    template<typename T> twofold<T> operator - (const twofold<T>& x) { return twofold<T>(-x.value, -x.error); }
-    template<typename T> coupled<T> operator - (const coupled<T>& x) { return coupled<T>(-x.value, -x.error); }
+    inline twofold<double> operator - (const twofold<double>& x) { return twofold<double>(-x.value, -x.error); }
+    inline coupled<double> operator - (const coupled<double>& x) { return coupled<double>(-x.value, -x.error); }
+    inline twofold<float>  operator - (const twofold<float> & x) { return twofold<float>(-x.value, -x.error); }
+    inline coupled<float>  operator - (const coupled<float> & x) { return coupled<float>(-x.value, -x.error); }
 
     // NB: note that x.value and x.error may have opposite signs
-    template<typename T> twofold<T> fabs(const twofold<T>& x) { return x.value < 0 ? -x : x; }
-    template<typename T> coupled<T> fabs(const coupled<T>& x) { return x.value < 0 ? -x : x; }
+    inline twofold<double> fabs(const twofold<double>& x) { return x.value < 0 ? -x : x; }
+    inline coupled<double> fabs(const coupled<double>& x) { return x.value < 0 ? -x : x; }
+    inline twofold<float>  fabs(const twofold<float> & x) { return x.value < 0 ? -x : x; }
+    inline coupled<float>  fabs(const coupled<float> & x) { return x.value < 0 ? -x : x; }
 
-    template<typename T> bool isnan(const shaped<T>& x) { return std::isnan(x.value) || std::isnan(x.error); }
-    template<typename T> bool isinf(const shaped<T>& x) { return std::isinf(x.value) || std::isinf(x.error); }
+    inline bool isnan(const shaped<double>& x) { return std::isnan(x.value) || std::isnan(x.error); }
+    inline bool isinf(const shaped<double>& x) { return std::isinf(x.value) || std::isinf(x.error); }
+    inline bool isnan(const shaped<float> & x) { return std::isnan(x.value) || std::isnan(x.error); }
+    inline bool isinf(const shaped<float> & x) { return std::isinf(x.value) || std::isinf(x.error); }
 
     //------------------------------------------------------------------
     //
