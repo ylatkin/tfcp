@@ -112,7 +112,7 @@ namespace tfcp {
 
     //------------------------------------------------------------------
     //
-    //  Arithmetic functions: tadd, tsub, tmul, tdiv, tsqrt
+    //  Arithmetic functions: tadd, tsub, tmul, tdiv, tsqrt, renormalize
     //
     //------------------------------------------------------------------
 
