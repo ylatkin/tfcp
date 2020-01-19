@@ -118,7 +118,7 @@ TEST_P(TestUnitSimdOps, smoke) {
 
 } // namespace
 
-INSTANTIATE_TEST_SUITE_P(types, TestUnitSimdOps,
+INSTANTIATE_TEST_SUITE_P(typesAndOps, TestUnitSimdOps,
                          Combine(Values("float",
                                         "double",
                                         "floatx",

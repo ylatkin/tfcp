@@ -256,7 +256,7 @@ namespace tfcp {
     template<typename T> inline T tsqrt0(T x0, T& z1)
     {
         T r0, r1;
-        r0 = sqrt(x0);
+        r0 = hw_sqrt(x0);
         r1 = fnmadd(r0, r0, x0);  // r = x - sqrt(x)^2
         z1 = r1 / (r0 + r0);      // Newton iteration
         return r0;
@@ -267,7 +267,7 @@ namespace tfcp {
     template<typename T> inline T tsqrtp(T x0, T x1, T& z1)
     {
         T r0, r1;
-        r0 = sqrt(x0);
+        r0 = hw_sqrt(x0);
         r1 = fnmadd(r0, r0, x0) + x1;  // r = x - sqrt(x)^2
         z1 = r1 / (r0 + r0);           // Newton iteration
         return r0;
@@ -277,7 +277,7 @@ namespace tfcp {
     template<typename T> inline T tsqrt(T x0, T x1, T& z1)
     {
         T r0, u0, u1, v0, v1, w0, w1;
-        r0 = sqrt(x0);
+        r0 = hw_sqrt(x0);
         u0 = padd0(x0, x1, u1);      // u = x renormalized
         v0 = tsqrtp(u0, u1, v1);     // v = sqrt(x)
         w0 = tsub1(v0, v1, r0, w1);  // w = sqrt(x) - r0

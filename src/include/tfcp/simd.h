@@ -161,14 +161,14 @@ namespace tfcp {
 
 #if defined(TFCP_SIMD_AVX)
 
-    inline floatx  sqrt(floatx  x) { return _mm256_sqrt_ps(x); }
-    inline doublex sqrt(doublex x) { return _mm256_sqrt_pd(x); }
+    inline floatx  hw_sqrt(floatx  x) { return _mm256_sqrt_ps(x); }
+    inline doublex hw_sqrt(doublex x) { return _mm256_sqrt_pd(x); }
 
-    inline float sqrt(float x) {
+    inline float hw_sqrt(float x) {
         return _mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(x)));
     }
 
-    inline double sqrt(double x) {
+    inline double hw_sqrt(double x) {
         __m128d tmp = _mm_set_sd(x);
         return _mm_cvtsd_f64(_mm_sqrt_sd(tmp, tmp));
     }

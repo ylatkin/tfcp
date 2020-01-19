@@ -41,7 +41,7 @@ protected:
                 getx(x, i) = dis(gen);
             }
 
-            result = tfcp::sqrt(x); // short-vector operation
+            result = tfcp::hw_sqrt(x); // short-vector operation
 
             for (int i = 0; i < len; i++)
             {
