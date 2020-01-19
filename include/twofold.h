@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <string>
+#include <type_traits>
 
 #include <cmath>
 
@@ -66,11 +67,21 @@ namespace tfcp {
         T value, error;
 
     public:
-        shaped() {}  // default undefined
-        shaped(T v, T e) : value(v), error(e) {}
+        shaped()                              { check_type(); }  // default undefined
+        shaped(T v, T e) : value(v), error(e) { check_type(); }
 
     protected:
-        void init(const shaped<T>& x) { value = x.value; error = x.error; }
+        void init(const shaped<T>& x) {
+            value = x.value;
+            error = x.error;
+        }
+
+    private:
+        void check_type() {
+            static_assert(std::is_same<T, float>::value ||
+                          std::is_same<T, double>::value,
+                          "unsupported base type");
+        }
     };
 
     //------------------------------------------------------------------
@@ -338,8 +349,10 @@ namespace tfcp {
 
     inline twofold<double> sqrt(const twofold<double>& x) { return tsqrt(x); }
     inline coupled<double> sqrt(const coupled<double>& x) { return psqrt(x); }
-    inline twofold<float> sqrt(const twofold<float>& x) { return tsqrt(x); }
-    inline coupled<float> sqrt(const coupled<float>& x) { return psqrt(x); }
+    inline twofold<float>  sqrt(const twofold<float> & x) { return tsqrt(x); }
+    inline coupled<float>  sqrt(const coupled<float> & x) { return psqrt(x); }
+    inline double sqrt(double x) { return std::sqrt(x); }
+    inline float  sqrt(float  x) { return std::sqrt(x); }
 
 #define TFCP_ARITHM_SAME_TYPE(OP, F, PREFIX, SHAPE, T) \
     inline SHAPE<T> operator OP(const SHAPE<T>& x, const SHAPE<T>& y) { return PREFIX ## F(x, y); } \
@@ -504,10 +517,125 @@ namespace tfcp {
 #undef TFCP_COMPARE_COUPLED
 
     //
-    // TODO: compare twofold
+    // Comparing twofolds may result in `undefined`
+    // In such case, the comparing operation throws
     //
-    // TODO: compare twofold vs coupled
+
+    struct twofold_exception {};
+
+#define TFCP_COMPARE_TWOFOLD(OP, T, S)                                   \
+    inline bool operator OP (const twofold<T>& x, const twofold<S>& y) { \
+        if (x.value OP y.value) {                                        \
+            coupled<T> px(x);                                            \
+            coupled<S> py(y);                                            \
+            if (px OP py) {                                              \
+                return true;                                             \
+            } else {                                                     \
+                throw twofold_exception();                               \
+            }                                                            \
+        } else {                                                         \
+            return false;                                                \
+        }                                                                \
+    }                                                                    \
+    inline bool operator OP (const twofold<T>& x, S y) {                 \
+        return x OP twofold<S>(y);                                       \
+    }                                                                    \
+    inline bool operator OP (T x, const twofold<S>& y) {                 \
+        return twofold<T>(x) OP y;                                       \
+    }
+    TFCP_COMPARE_TWOFOLD(==, double, double);
+    TFCP_COMPARE_TWOFOLD(!=, double, double);
+    TFCP_COMPARE_TWOFOLD(>=, double, double);
+    TFCP_COMPARE_TWOFOLD(<=, double, double);
+    TFCP_COMPARE_TWOFOLD(> , double, double);
+    TFCP_COMPARE_TWOFOLD(< , double, double);
+    TFCP_COMPARE_TWOFOLD(==, double, float);
+    TFCP_COMPARE_TWOFOLD(!=, double, float);
+    TFCP_COMPARE_TWOFOLD(>=, double, float);
+    TFCP_COMPARE_TWOFOLD(<=, double, float);
+    TFCP_COMPARE_TWOFOLD(> , double, float);
+    TFCP_COMPARE_TWOFOLD(< , double, float);
+    TFCP_COMPARE_TWOFOLD(==, float, double);
+    TFCP_COMPARE_TWOFOLD(!=, float, double);
+    TFCP_COMPARE_TWOFOLD(>=, float, double);
+    TFCP_COMPARE_TWOFOLD(<=, float, double);
+    TFCP_COMPARE_TWOFOLD(> , float, double);
+    TFCP_COMPARE_TWOFOLD(< , float, double);
+    TFCP_COMPARE_TWOFOLD(==, float, float);
+    TFCP_COMPARE_TWOFOLD(!=, float, float);
+    TFCP_COMPARE_TWOFOLD(>=, float, float);
+    TFCP_COMPARE_TWOFOLD(<=, float, float);
+    TFCP_COMPARE_TWOFOLD(> , float, float);
+    TFCP_COMPARE_TWOFOLD(< , float, float);
+#undef TFCP_COMPARE_TWOFOLD
+
     //
+    // Compare twofold vs coupled
+    //
+
+#define TFCP_COMPARE_CROSS_SHAPE_SAME_TYPE(OP, T)                        \
+    inline bool operator OP (const twofold<T>& x, const coupled<T>& y) { \
+        if (x.value OP y.value) {                                        \
+            coupled<T> px(x);                                            \
+            if (px OP y) {                                               \
+                return true;                                             \
+            } else {                                                     \
+                throw twofold_exception();                               \
+            }                                                            \
+        } else {                                                         \
+            return false;                                                \
+        }                                                                \
+    }                                                                    \
+    inline bool operator OP (const coupled<T>& x, const twofold<T>& y) { \
+        if (x.value OP y.value) {                                        \
+            coupled<T> py(y);                                            \
+            if (x OP py) {                                               \
+                return true;                                             \
+            } else {                                                     \
+                throw twofold_exception();                               \
+            }                                                            \
+        } else {                                                         \
+            return false;                                                \
+        }                                                                \
+    }
+    TFCP_COMPARE_CROSS_SHAPE_SAME_TYPE(==, double);
+    TFCP_COMPARE_CROSS_SHAPE_SAME_TYPE(!=, double);
+    TFCP_COMPARE_CROSS_SHAPE_SAME_TYPE(>=, double);
+    TFCP_COMPARE_CROSS_SHAPE_SAME_TYPE(<=, double);
+    TFCP_COMPARE_CROSS_SHAPE_SAME_TYPE(> , double);
+    TFCP_COMPARE_CROSS_SHAPE_SAME_TYPE(< , double);
+    TFCP_COMPARE_CROSS_SHAPE_SAME_TYPE(==, float);
+    TFCP_COMPARE_CROSS_SHAPE_SAME_TYPE(!=, float);
+    TFCP_COMPARE_CROSS_SHAPE_SAME_TYPE(>=, float);
+    TFCP_COMPARE_CROSS_SHAPE_SAME_TYPE(<=, float);
+    TFCP_COMPARE_CROSS_SHAPE_SAME_TYPE(> , float);
+    TFCP_COMPARE_CROSS_SHAPE_SAME_TYPE(< , float);
+#undef TFCP_COMPARE_CROSS_SHAPE_SAME_TYPE
+
+#define TFCP_COMPARE_CROSS_SHAPE_VAR_TYPES(OP)                                    \
+    inline bool operator OP (const twofold<float>& x, const coupled<double>& y) { \
+        twofold<double> dx(x);                                                    \
+        return dx OP y;                                                           \
+    }                                                                             \
+    inline bool operator OP (const coupled<float>& x, const twofold<double>& y) { \
+        coupled<double> dx(x);                                                    \
+        return dx OP y;                                                           \
+    }                                                                             \
+    inline bool operator OP (const twofold<double>& x, const coupled<float>& y) { \
+        coupled<double> dy(y);                                                    \
+        return x OP dy;                                                           \
+    }                                                                             \
+    inline bool operator OP (const coupled<double>& x, const twofold<float>& y) { \
+        twofold<double> dy(y);                                                    \
+        return x OP dy;                                                           \
+    }
+    TFCP_COMPARE_CROSS_SHAPE_VAR_TYPES(==);
+    TFCP_COMPARE_CROSS_SHAPE_VAR_TYPES(!=);
+    TFCP_COMPARE_CROSS_SHAPE_VAR_TYPES(>=);
+    TFCP_COMPARE_CROSS_SHAPE_VAR_TYPES(<=);
+    TFCP_COMPARE_CROSS_SHAPE_VAR_TYPES(>);
+    TFCP_COMPARE_CROSS_SHAPE_VAR_TYPES(<);
+#undef TFCP_COMPARE_CROSS_SHAPE_VAR_TYPES
 
     //------------------------------------------------------------------
     //
