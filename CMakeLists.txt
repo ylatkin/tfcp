@@ -9,7 +9,7 @@ project(TFCP CXX)
 
 # Local copy:
 # - googletest (no googlemock)
-set(GTEST_SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/googletest/googletest)
+set(GTEST_SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/googletest)
 
 set(TFCP_SOURCE_DIR ${CMAKE_SOURCE_DIR})
 
@@ -42,6 +42,9 @@ endif()
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+# Build library
+add_subdirectory(src)
 
 # Build tests
 add_subdirectory(tests)

@@ -3,15 +3,17 @@
 #
 # Added to CTest at top-level CMake
 
-file(GLOB sources *.cpp)
+set(TARGET test_unit)
 
-add_executable(test_unit ${sources})
+file(GLOB SOURCES *.cpp)
 
-target_link_libraries(test_unit gtest gtest_main)
+add_executable(${TARGET} ${SOURCES})
 
-target_compile_options(test_unit PRIVATE ${CXX_OPTS_FMA}
+target_link_libraries(${TARGET} gtest gtest_main)
+
+target_compile_options(${TARGET} PRIVATE ${CXX_OPTS_FMA}
                                          ${CXX_OPTS_FP})
 
-target_include_directories(test_unit PRIVATE ${TFCP_SOURCE_DIR}/src/include
+target_include_directories(${TARGET} PRIVATE ${TFCP_SOURCE_DIR}/src/include
                                              ${TFCP_SOURCE_DIR}/tests/include
-                                             ${GTEST_SOURCE_DIR}/include)
+                                             ${GTEST_SOURCE_DIR}/googletest/include)
