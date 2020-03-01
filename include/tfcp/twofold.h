@@ -68,8 +68,8 @@ namespace tfcp {
                                        std::is_same<T, double>::value>>
     struct shaped {
     public:
-        T value = 0;
-        T error = 0;
+        T value;
+        T error;
     public:
         shaped() {}
         shaped(T v, T e) : value(v), error(e) {}
