@@ -7,12 +7,8 @@
 
 #include <gtest/gtest.h>
 
-#include <random>
 #include <string>
-#include <tuple>
-
-#include <cmath>
-#include <cstdio>
+#include <type_traits>
 
 namespace {
 
@@ -45,23 +41,13 @@ protected:
         GTEST_SKIP();
     #endif
 
-        EXPECT_EQ(sizeof(tfloat), 2 * sizeof(float));
+        EXPECT_TRUE((std::is_same<tfloat, twofold<float>>::value));
 
-        EXPECT_EQ(sizeof(tdouble), 2 * sizeof(double));
+        EXPECT_TRUE((std::is_same<tdouble, twofold<double>>::value));
 
-        EXPECT_EQ(sizeof(pfloat), 2 * sizeof(float));
+        EXPECT_TRUE((std::is_same<pfloat, coupled<float>>::value));
 
-        EXPECT_EQ(sizeof(pdouble), 2 * sizeof(double));
-
-    #if 0
-        EXPECT_EQ(sizeof(tfloatx), 2 * sizeof(floatx));
-
-        EXPECT_EQ(sizeof(tdoublex), 2 * sizeof(doublex));
-
-        EXPECT_EQ(sizeof(pfloatx), 2 * sizeof(floatx));
-
-        EXPECT_EQ(sizeof(pdoublex), 2 * sizeof(doublex));
-    #endif
+        EXPECT_TRUE((std::is_same<pdouble, coupled<double>>::value));
     }
 
     static void test_release()
@@ -70,23 +56,13 @@ protected:
         GTEST_SKIP();
     #endif
 
-        EXPECT_EQ(sizeof(tfloat), sizeof(float));
+        EXPECT_TRUE((std::is_same<tfloat, float>::value));
 
-        EXPECT_EQ(sizeof(tdouble), sizeof(double));
+        EXPECT_TRUE((std::is_same<tdouble, double>::value));
 
-        EXPECT_EQ(sizeof(pfloat), 2 * sizeof(float));
+        EXPECT_TRUE((std::is_same<pfloat, coupled<float>>::value));
 
-        EXPECT_EQ(sizeof(pdouble), 2 * sizeof(double));
-
-    #if 0
-        EXPECT_EQ(sizeof(tfloatx), sizeof(floatx));
-
-        EXPECT_EQ(sizeof(tdoublex), sizeof(doublex));
-
-        EXPECT_EQ(sizeof(pfloatx), 2 * sizeof(floatx));
-
-        EXPECT_EQ(sizeof(pdoublex), 2 * sizeof(doublex));
-    #endif
+        EXPECT_TRUE((std::is_same<pdouble, coupled<double>>::value));
     }
 };
 
